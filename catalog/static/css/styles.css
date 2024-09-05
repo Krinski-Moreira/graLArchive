@@ -1,0 +1,35 @@
+.sidebar-nav {
+    margin-top: 20px;
+    padding: 0;
+    list-style: none;
+  }
+
+table {
+  width: 100%;          /* Table takes up full width */
+  border-collapse: collapse;
+  border-spacing: 0;     /* Adjust if needed */
+  border: 1px solid black;
+  overflow: auto;      /* Horizontal scroll when needed */
+  display: block;        /* Allows for scrolling */
+}
+thead, tbody {
+  display: table;        /* Set these to display as table */
+  width: 100%;           /* Ensure the table uses full width */
+}
+
+td, th {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+  min-width: 150px;      /* Minimum width for columns, adjust as necessary */
+}
+
+tbody {
+  display: block;        /* This makes it scrollable */
+  overflow-x: auto;      /* Horizontal scrolling for the content */
+  width: 100%;
+}
+
+thead {
+  width: 100%;           /* Full width for header */
+}

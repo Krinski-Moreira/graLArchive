@@ -17,23 +17,31 @@ def index(request):
     return render(request, 'index.html', context=context)
     
 def lens(request):
-    test = Lens.objects.values()
-    fields = [f.name for f in Lens._meta.get_fields()]
-    print(test)
-    print(fields)
+    components = LensComponent.objects.values()
+    #lenses = Lens.objects.values()
+    lensfields = [f.name for f in Lens._meta.get_fields()]
+    compfields = [f.name for f in LensComponent._meta.get_fields()]
+    #print(compfields, lensfields)
+    fields = lensfields[2:] + compfields[2:]
     table = [fields]
-    for lens in test:
+
+    for component in components:
         line = []
-        print(lens)
-        #for f in fields:
-        #    print(f)
-        for k, v in lens.items():
-            print(k, v)
-            line.append(v)
+        lens = Lens.objects.filter(id = component['Name_id']).values()
+        #print(component, lens, type(lens))
+        for k, v in lens[0].items():
+            #print(k, v)
+            if(k in fields):
+                line.append(v)
+        for k, v in component.items():
+            #print(k, v)
+            if(k in fields):
+                line.append(v)
         table.append(line)
-    print(table)
+
+    #print(table)
     context = {
-        'table' : table
+        'table' : table,
     }
 
     return render(request, 'catalog/lens_list.html', context=context)
