@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Strong gravitational lenses of quasars database</h1>
+  <table>
+    {% for row in table %}
+        <tr>
+        {% for cell in row %}
+            {% if forloop.first or forloop.parentloop.first %} <th> {% else %} <td> {% endif %}
+                {{ cell }}
+            {% if forloop.first or forloop.parentloop.first %} </th> {% else %} </td> {% endif %}
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

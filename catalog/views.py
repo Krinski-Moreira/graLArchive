@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import Lens, LensComponent
+from django.views import generic
 
 # Create your views here.
 
@@ -14,3 +15,25 @@ def index(request):
     }
 
     return render(request, 'index.html', context=context)
+    
+def lens(request):
+    test = Lens.objects.values()
+    fields = [f.name for f in Lens._meta.get_fields()]
+    print(test)
+    print(fields)
+    table = [fields]
+    for lens in test:
+        line = []
+        print(lens)
+        #for f in fields:
+        #    print(f)
+        for k, v in lens.items():
+            print(k, v)
+            line.append(v)
+        table.append(line)
+    print(table)
+    context = {
+        'table' : table
+    }
+
+    return render(request, 'catalog/lens_list.html', context=context)
