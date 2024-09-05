@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Gravitational Lenses Archive</h1>
+  <p>
+    Welcome to the Gravitational Lenses Archive, a website developed by
+    Otavio S Krinski Moreira, in collaboration with Gaia GraL and IAG USP!
+    For now there are only fictitious strong gravitational lenses of quasars,
+    but soon this site will host all lenses confirmed.
+  </p>
+  <h2>Dynamic content</h2>
+  <p>The mock database has the following record counts:</p>
+  <ul>
+    <li><strong>Lenses:</strong> {{ num_lenses }}</li>
+    <li><strong>Gaia GraL lenses:</strong> {{ num_gaia }}</li>
+  </ul>
+{% endblock %}
