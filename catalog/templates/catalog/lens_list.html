@@ -2,6 +2,20 @@
 
 {% block content %}
   <h1>Strong gravitational lenses of quasars database</h1>
+  <form action="" method="get">
+    {% csrf_token %}
+    <!-- {{ form }} -->
+    {% for option in options %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
+            <label for="option.0">{{option.1}}</label>
+        </div>
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+<button>
+    <a class="nav-link" href="{% url 'export_csv' %}">Download csv table</a>
+</button>
   <table>
     {% for row in table %}
         <tr>
