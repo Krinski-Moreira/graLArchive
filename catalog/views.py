@@ -4,9 +4,30 @@ from django.views import generic
 from .forms import CreatefieldsForm
 import csv
 from django.http import HttpResponse
+import pandas as pd
 
 
 # Create your views here.
+
+def create_table_pd(fields):
+    lens_data = Lens.objects.values()  # Get all Lens data as a QuerySet of dictionaries
+    component_data = LensComponent.objects.values()  # Get all LensComponent data
+
+    # Step 2: Load the data into Pandas DataFrames
+    lens_df = pd.DataFrame(list(lens_data))  # Convert to DataFrame
+    component_df = pd.DataFrame(list(component_data))  # Convert to DataFrame
+
+    # Step 3: Merge the two DataFrames on Lens ID and Name_id in LensComponent
+    merged_df = pd.merge(lens_df, component_df, left_on='id', right_on='Name_id')
+
+    # Step 4: Filter the fields (columns) you want to include in the final table
+    final_table = merged_df[fields]
+
+    # Step 5: Convert the final DataFrame back to a list (optional, if needed)
+    final_table_list = final_table.values.tolist()
+    final_table_list.insert(0, fields)
+
+    return final_table_list
 
 def create_table(fields):
     table = [fields]
@@ -32,10 +53,14 @@ def index(request):
     """View function for home page of site."""
     num_lenses = Lens.objects.all().count()
     num_gaia = Lens.objects.filter(GraL="TRUE").count()
+    num_quad = Lens.objects.filter(Type="Quad").count()
+    num_double = Lens.objects.filter(Type="Double").count()
 
     context = {
         'num_lenses' : num_lenses,
         'num_gaia' : num_gaia,
+        'num_quad' : num_quad,
+        'num_double' : num_double
     }
 
     return render(request, 'index.html', context=context)
@@ -48,6 +73,7 @@ def lens(request):
     #print(compfields, lensfields)
     fields = lensfields[2:] + compfields[2:]
     savedfields = request.session.get('sfields', fields)
+    
     form = CreatefieldsForm()
     options = []
     for i in range(len(fields)):
@@ -56,9 +82,10 @@ def lens(request):
     form_values = request.GET.getlist('fieldsform')
     request.session['sfields'] = form_values
     savedfields = form_values
-    print(form_values)
+    if not savedfields:
+        savedfields = fields
 
-    table = create_table(form_values)
+    table = create_table_pd(savedfields)
 
     context = {
         'table' : table,

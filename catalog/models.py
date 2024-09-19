@@ -16,22 +16,33 @@ class Lens(models.Model):
 
     RA_mean = models.DecimalField(
         max_digits = 11,
-        decimal_places = 8
+        decimal_places = 8,
+        null=True,
+        blank=True
     )
 
     DEC_mean = models.DecimalField(
         max_digits = 10,
-        decimal_places = 8
+        decimal_places = 8,
+        null=True,
+        blank=True
+    )
+
+    Type = models.CharField(
+        max_length = 10,
+        help_text = "Type of the lens (Double, Quad, Unknown)",
     )
 
     Author = models.CharField(
         max_length = 20,
-        help_text = "Year and author of published paper"
+        help_text = "Year and author of published paper",
+        blank=True
     )
 
     BibCode = models.CharField(
         max_length = 20,
-        help_text = "Year and author of published paper"
+        help_text = "BibCode of published paper",
+        blank=True
     )
 
     class Boolean_class(models.TextChoices):
@@ -40,7 +51,8 @@ class Lens(models.Model):
 
     GraL = models.CharField(
         max_length=5,
-        choices=Boolean_class
+        choices=Boolean_class,
+        blank=True
     )
 
     Max_separation = models.FloatField()
@@ -63,12 +75,16 @@ class LensComponent(models.Model):
 
     RA_best = models.DecimalField(
         max_digits = 11,
-        decimal_places = 8
+        decimal_places = 8,
+        null=True,
+        blank=True
     )
 
     DEC_best = models.DecimalField(
         max_digits = 10,
-        decimal_places = 8
+        decimal_places = 8,
+        null=True,
+        blank=True
     )
 
     def __str__(self):
