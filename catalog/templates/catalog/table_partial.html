@@ -1,0 +1,11 @@
+<table>
+    {% for row in table %}
+        <tr>
+        {% for cell in row %}
+            {% if forloop.parentloop.first %} <th> {% else %} <td> {% endif %}
+                {{ cell }}
+            {% if forloop.parentloop.first %} </th> {% else %} </td> {% endif %}
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>

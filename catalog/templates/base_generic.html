@@ -17,17 +17,15 @@
   </head>
   <body>
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-2">
-          {% block sidebar %}
-            <ul class="sidebar-nav">
-              <li><a href="{% url 'index' %}">Home</a></li>
-              <li><a href="{% url 'lens' %}">Database</a></li>
-            </ul>
-          {% endblock %}
-        </div>
-        <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
-      </div>
+          <div class="topbar">
+            <nav>
+                <ul>
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'lens' %}">Database</a>
+                </ul>
+            <nav>
+          </div>
+          <div>{% block content %}{% endblock %}</div>
     </div>
   </body>
 </html>

@@ -5,6 +5,7 @@ from .forms import CreatefieldsForm
 import csv
 from django.http import HttpResponse
 import pandas as pd
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -22,6 +23,7 @@ def create_table_pd(fields):
 
     # Step 4: Filter the fields (columns) you want to include in the final table
     final_table = merged_df[fields]
+    final_table = final_table.fillna('')
 
     # Step 5: Convert the final DataFrame back to a list (optional, if needed)
     final_table_list = final_table.values.tolist()
@@ -93,6 +95,9 @@ def lens(request):
         "options": options,
         "savedfields": savedfields
     }
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'catalog/table_partial.html', {'table': table})
 
     return render(request, 'catalog/lens_list.html', context=context)
 

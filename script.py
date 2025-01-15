@@ -15,7 +15,7 @@ import pandas as pd
 
 Lens.objects.all().delete()
 
-df = pd.read_csv(csv_filepathname, na_filter=False)
+df = pd.read_csv(csv_filepathname, na_filter=False, keep_default_na=False)
 
 table_df = df[df["Confirmed"] != 0]
 
@@ -32,10 +32,16 @@ for lens_name in lens_names:
     for lensfield in lensfields:
         if(lensfield in columns):
             value = table_df[table_df["Name"] == lens_name][lensfield].to_list()[0]
+            if pd.isna(value):  # Check if the value is NaN
+                value = ""  # Replace NaN with an empty string
             if(value == ""):
                 #save = False
                 print(lens_name, lensfield, value, type(value), table_df[table_df["Name"] == lens_name]["Confirmed"].to_list()[0])
-            setattr(lens, lensfield, value)            
+                continue
+            try:
+                setattr(lens, lensfield, value) 
+            except:
+                print("Error in setattr", lens, lensfield, value)           
     lens.save()
     
     rows_df = table_df[table_df["Name"] == lens_name]
@@ -50,10 +56,16 @@ for lens_name in lens_names:
             continue
         for compfield in compfields[2:]:
             value = row[compfield]
+            if pd.isna(value):  # Check if the value is NaN
+                value = ""  # Replace NaN with an empty string
             if(value == ""):
                 #save = False
                 print(lens_name, compfield, value, type(value), table_df[table_df["Name"] == lens_name]["Confirmed"].to_list()[0])
-            setattr(component, compfield, value)
+                continue
+            try:
+                setattr(component, compfield, value)
+            except:
+                print("Error in setattr", component, compfield, value)
         component.save()
 
         

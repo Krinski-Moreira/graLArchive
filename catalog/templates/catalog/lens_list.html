@@ -5,18 +5,20 @@
   <form action="" method="get">
     {% csrf_token %}
     <!-- {{ form }} -->
+    <div class="form-columns">  
     {% for option in options %}
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
             <label for="option.0">{{option.1}}</label>
         </div>
     {% endfor %}
+    </div>
     <input type="submit" value="Submit">
 </form>
 <button>
     <a class="nav-link" href="{% url 'export_csv' %}">Download csv table</a>
 </button>
-  <table>
+ <!-- <table>
     {% for row in table %}
         <tr>
         {% for cell in row %}
@@ -26,5 +28,38 @@
         {% endfor %}
         </tr>
     {% endfor %}
-</table>
+</table>-->
+<div id="table-container">
+    {% include 'catalog/table_partial.html' with table=table %}
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('input[name="fieldsform"]');
+        const tableContainer = document.getElementById('table-container');
+    
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                updateTable();
+            });
+        });
+    
+        function updateTable() {
+            const selectedFields = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+    
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `{% url 'lens' %}?fieldsform=${selectedFields.join('&fieldsform=')}`, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    tableContainer.innerHTML = xhr.responseText;
+                }
+            };
+    
+            xhr.send();
+        }
+    });
+    </script>
 {% endblock %}

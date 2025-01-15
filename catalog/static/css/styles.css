@@ -1,9 +1,47 @@
-.sidebar-nav {
-    margin-top: 20px;
-    padding: 0;
-    list-style: none;
-  }
+.topbar {
+  /*  position: -webkit-sticky;  Safari */
+  position: sticky;
+  overflow: hidden;
+  background-color: #333;
+  top: 0;
+  width: 100%;
+  z-index: 1000; /* Ensures the navbar stays on top of other content */
+}
 
+
+/* Style the links inside the navigation bar */
+.topbar a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  display: block;
+  padding: 15px 15px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topbar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+div.form-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px; /* Optional: adds space between columns */
+}
+
+.form-check {
+  flex: 0 0 25%; /* Allows items to take up 30% of the container width */
+  box-sizing: border-box;
+}
 table {
   width: auto;
   table-layout: auto;          /* Table takes up full width */
@@ -18,7 +56,7 @@ td, th {
   border: 1px solid black;
   padding: 8px;
   text-align: center;
-  min-width: 120px;      /* Minimum width for columns, adjust as necessary */
+  min-width: 120px;      /* Minimum width for columns, adjust as necessary */ 
 }
 
 tbody {
