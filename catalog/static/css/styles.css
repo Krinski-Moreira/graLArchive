@@ -32,6 +32,11 @@
   color: white;
 }
 
+div.default-form {
+  display:flex;
+
+}
+
 div.form-columns {
   display: none; /* shown when a link targeting this id is clicked */
   flex-wrap: wrap;
@@ -41,6 +46,14 @@ div.form-columns {
 .form-check {
   flex: 0 0 25%; /* Allows items to take up 30% of the container width */
   box-sizing: border-box;
+}
+
+.labelpopup {
+  position: absolute;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 1000;
 }
 
 table {

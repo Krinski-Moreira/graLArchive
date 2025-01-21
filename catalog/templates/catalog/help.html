@@ -1,0 +1,40 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+<p>help text</p>
+<div id="helptext"></div>
+{{fields|json_script:"fields_json" }}
+<script>
+        fields = JSON.parse(document.getElementById('fields_json').textContent)
+        var html = ""
+        get_help_text(fields, 'helptext')
+
+    function get_help_text(fields, id){
+        const url = '{% static "text.json" %}'
+        fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status}`);
+            }
+            return response.json();})
+            .then((json) => help_text(json, fields, id))
+            .catch((err) => console.error(`Fetch problem: ${err.message}`));
+    }
+    function help_text(json, fields, id){
+        var html = "";
+        fields.forEach(field => {
+            html += `<p id ="${field}">`+ field + ": ";
+            html += json[field] + '</p>';
+        });
+        document.getElementById(id).innerHTML = html;
+
+        const hash = window.location.hash;
+        if (hash) {
+            const element = document.querySelector(hash);
+            if (element) {
+                element.scrollIntoView();
+            }
+        }
+    }
+</script>
+{% endblock %}

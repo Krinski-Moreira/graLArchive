@@ -95,6 +95,16 @@ def index(request):
     }
 
     return render(request, 'index.html', context=context)
+
+def help(request):
+    lensfields = [f.name for f in Lens._meta.get_fields()]
+    compfields = [f.name for f in LensComponent._meta.get_fields()]
+    fields = lensfields[2:] + compfields[2:]
+
+    context = {
+        'fields' : fields,
+    }
+    return render(request, 'catalog/help.html', context = context)
     
 def lens(request):
     start_time = timezone.now()
@@ -118,7 +128,7 @@ def lens(request):
     form = CreatefieldsForm()
     options = []
     for i in range(len(fields)):
-        options.append((i,fields[i]))
+        options.append((i,fields[i], fields[i]+"popup"))
 
     form_values = request.GET.getlist('fieldsform')
     request.session['sfields'] = form_values

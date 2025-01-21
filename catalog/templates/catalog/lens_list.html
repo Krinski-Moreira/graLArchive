@@ -5,18 +5,21 @@
   <form action="" method="get">
     {% csrf_token %}
     <!-- {{ form }} -->
-    <div class= "default-form">
+    <div class="default-form">
+        <label for="defaultid">
         <input class="form-check-input" type="checkbox" value="default" id = "defaultid" name="defaultform", onclick=onlyOne(this) checked>
-        <label for="defautlid">Default</label>
+        Default</label>
+        <label for="allid">
         <input class="form-check-input" type="checkbox" value="all" id = "allid" name="defaultform", onclick=onlyOne(this)>
-        <label for="allid">All columns</label>
+       All columns</label>
     </div>
     <a id="toggleButton" onclick="toggleColumns(); return false" href="#">Show all columns</a>
     <div class="form-columns" id = "form-columns-id">  
     {% for option in options %}
         <div class="form-check">
+            <label for={{option.0}}>
             <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
-            <label for="option.0">{{option.1}}</label>
+            <div class="form-label" id={{option.1}}> {{option.1}} <span id={{option.2}} class=labelpopup style="display: none">text </span> </div></label>
         </div>
     {% endfor %}
     </div>
@@ -95,10 +98,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         const checkboxes = document.querySelectorAll('input[name="fieldsform"]');
         const tableContainer = document.getElementById('table-container');
-        const aladinlist = document.getElementsByClassName('aladinlink')
+        const aladinlist = document.getElementsByClassName('aladinlink');
         // Convert HTMLCollection to an array
         const aladinArray = Array.from(aladinlist);
-        console.log(aladinArray)
 
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function () {
@@ -110,6 +112,25 @@
             link.addEventListener('click', function () {
                 var index = Number(link.id.substring(1));
                 showAladin(index);
+            });
+        });
+        
+    
+        
+        const labelArray = document.querySelectorAll('.form-label');
+    
+        labelArray.forEach(label => {
+            const textareaId = label.querySelector('span').id;
+            get_help_text(label.id, textareaId);
+    
+            label.addEventListener('mouseover', function () {
+                const popup = document.getElementById(textareaId);
+                popup.style.display = 'block';
+            });
+    
+            label.addEventListener('mouseout', function () {
+                const popup = document.getElementById(textareaId);
+                popup.style.display = 'none';
             });
         });
 
@@ -168,10 +189,6 @@
                 doc.head.appendChild(script);
             };
             doc.close();
-            //let aladin;
-            //A.init.then(() => {
-            //    aladin = A.aladin("#"+aladin_id, {survey: "P/PanSTARRS/DR1/color/z/zg/g", fov:fov_value, target: loc});
-            //});
         }
     
         function updateTable() {
@@ -219,13 +236,14 @@
 
     function renderTable(tableData) {
         let html = '<table>';
+        let helpBaseUrl = "{% url 'help' %}"; // Get the base URL for the help page from Django
 
         for(var i = 0; i < tableData.length; i++) {
             html += '<tr>';
             if(i === 0){
-                tableData[i].forEach(cell => {
-                    html += `<th>${cell}</th>`;
-                });
+                for(var j = 0; j< tableData[0].length; j++){
+                    html += `<th id="header${j}" class="table-header"><a href="${helpBaseUrl}#${tableData[i][j]}">${tableData[i][j]}</a></th>`;
+                };
             }
             else{
                 for(var j = 0; j< tableData[0].length; j++){
@@ -236,9 +254,6 @@
                         html += `<td>${tableData[i][j]}</td>`;
                     }
                 }
-                //tableData[i].forEach(cell => {
-                //    html += `<td>${cell}</td>`;
-                //});
             }
             html += '</tr>';
         }
@@ -264,6 +279,25 @@
             document.getElementById("toggleButton").innerText = "Show all columns";
             status = "less"
         }
+    }
+
+    function get_help_text(field, id){
+        const url = '{% static "text.json" %}'
+        fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((json) => help_text(field, json[field], id))
+          .catch((err) => console.error(`Fetch problem: ${err.message}`));
+    }
+    function help_text(field, text, id){
+        let helpBaseUrl = "{% url 'help' %}";
+        let html = `<a href="${helpBaseUrl}#${field}">`
+        html += field + `</a>` + ": " + text
+        document.getElementById(id).innerHTML = html
     }
 </script>
 {% endblock %}
