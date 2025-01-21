@@ -33,15 +33,16 @@
 }
 
 div.form-columns {
-  display: flex;
+  display: none; /* shown when a link targeting this id is clicked */
   flex-wrap: wrap;
-  gap: 2px; /* Optional: adds space between columns */
+  gap: 2px;
 }
 
 .form-check {
   flex: 0 0 25%; /* Allows items to take up 30% of the container width */
   box-sizing: border-box;
 }
+
 table {
   width: auto;
   table-layout: auto;          /* Table takes up full width */

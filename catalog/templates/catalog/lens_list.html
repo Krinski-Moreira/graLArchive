@@ -1,11 +1,18 @@
 {% extends "base_generic.html" %}
-
+{% load static %}
 {% block content %}
   <h1>Strong gravitational lenses of quasars database</h1>
   <form action="" method="get">
     {% csrf_token %}
     <!-- {{ form }} -->
-    <div class="form-columns">  
+    <div class= "default-form">
+        <input class="form-check-input" type="checkbox" value="default" id = "defaultid" name="defaultform", onclick=onlyOne(this) checked>
+        <label for="defautlid">Default</label>
+        <input class="form-check-input" type="checkbox" value="all" id = "allid" name="defaultform", onclick=onlyOne(this)>
+        <label for="allid">All columns</label>
+    </div>
+    <a id="toggleButton" onclick="toggleColumns(); return false" href="#">Show all columns</a>
+    <div class="form-columns" id = "form-columns-id">  
     {% for option in options %}
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
@@ -13,7 +20,7 @@
         </div>
     {% endfor %}
     </div>
-    <input type="submit" value="Submit">
+   <!-- <input type="submit" value="Submit"> -->
 </form>
 <button>
     <a class="nav-link" href="{% url 'export_csv' %}">Download csv table</a>
@@ -32,16 +39,140 @@
 <div id="table-container">
     {% include 'catalog/table_partial.html' with table=table %}
 </div>
+
+<script type="text/javascript" src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js" charset="utf-8"></script>
+
 <script>
+    function onlyOne(checkbox) {
+        var checkboxes = document.getElementsByName(checkbox.name)
+        checkboxes.forEach((item) => {
+            if (item !== checkbox) item.checked = false
+            else if(item.checked == true){
+                updateTableDefault(item.value);
+            }
+        })
+        function updateTableDefault(value) {
+            const tableContainer = document.getElementById('table-container');
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `{% url 'lens' %}?defaultform=${value}`, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest2');
+    
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    tableContainer.innerHTML = xhr.responseText;
+                    const fieldboxes = document.querySelectorAll('input[name="fieldsform"]');
+                    let fields = JSON.parse(document.getElementById('fields_json').textContent);
+                    fieldboxes.forEach((item) => {
+                        if(containsObject(item.value, fields)){
+                            item.checked = true
+                        }
+                        else{
+                            item.checked = false
+                        }
+                    })
+                    const startTime = performance.now()
+                    let tableData = JSON.parse(document.getElementById('table_json').textContent);
+                    renderTable(tableData);
+                    const endTime = performance.now()
+                    console.log(`Call took ${endTime - startTime} milliseconds`)
+                }
+            };
+    
+            xhr.send();
+        }
+        function containsObject(obj, list) {
+            var i;
+            for (i = 0; i < list.length; i++) {
+                if (list[i] === obj) {
+                    return true;
+                }
+            }
+        
+            return false;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const checkboxes = document.querySelectorAll('input[name="fieldsform"]');
         const tableContainer = document.getElementById('table-container');
-    
+        const aladinlist = document.getElementsByClassName('aladinlink')
+        // Convert HTMLCollection to an array
+        const aladinArray = Array.from(aladinlist);
+        console.log(aladinArray)
+
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function () {
                 updateTable();
             });
         });
+
+        aladinArray.forEach(link => {
+            link.addEventListener('click', function () {
+                var index = Number(link.id.substring(1));
+                showAladin(index);
+            });
+        });
+
+        function showAladin(index){
+            var table = JSON.parse(document.getElementById('table_json').textContent);
+            var name = table[index][0];
+            var ra = table[index][1];
+            var dec = table[index][2];
+            var loc = ra + " " + dec;
+            var typelens = table[index][3]
+            //var aladin_id = `aladin${index}`;
+            //document.getElementById(aladin_id).style = "width:400px;height:400px;";
+            var max_sep = table[index][7];
+            if(max_sep == 0){
+                max_sep = 5.0
+            }
+            fov_value = (1.0/3600.)*max_sep*2.
+            console.log(fov_value, loc);
+            var myWindow = window.open('','','width=550,height=600');
+            var doc = myWindow.document;
+            // Assign variables to window object
+            myWindow.aladinData = {
+                name: table[index][0],
+                ra: table[index][1],
+                dec: table[index][2],
+                type: typelens,
+                loc: ra + " " + dec,
+                fovValue: (1.0 / 3600) * max_sep * 7.5
+            };
+            doc.open();
+            doc.write(`
+                <html>
+                <head>
+                    <title>Aladin</title>
+                    <style>
+                        body {
+                            height: 100vh;
+                            margin: 0;
+                    </style>
+                </head>
+                <body>
+                    <div id="text" style="text-align: center;"></div>
+                    <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%;">
+                        <div id="aladin-lite-div" style="width: 500px; height: 500px;"></div>
+                    </div>
+                </body>
+                </html>
+            `);
+            var aladinlibrary = doc.createElement('script');
+            aladinlibrary.src = 'https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js'
+            aladinlibrary.charset = "utf-8"
+            doc.head.appendChild(aladinlibrary);
+            var script = doc.createElement('script');
+            script.src = '{% static "aladin.js" %}';
+            aladinlibrary.onload = function() {
+                doc.head.appendChild(script);
+            };
+            doc.close();
+            //let aladin;
+            //A.init.then(() => {
+            //    aladin = A.aladin("#"+aladin_id, {survey: "P/PanSTARRS/DR1/color/z/zg/g", fov:fov_value, target: loc});
+            //});
+        }
     
         function updateTable() {
             const selectedFields = Array.from(checkboxes)
@@ -55,11 +186,84 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                     tableContainer.innerHTML = xhr.responseText;
+                    const startTime = performance.now()
+                    const defaultboxes = document.querySelectorAll('input[name="defaultform"]');
+                    let defaultlist = JSON.parse(document.getElementById('default_json').textContent);
+                    if(defaultlist.length > 0){
+                        defaultboxes.forEach((item) => {
+                            if(item.value == defaultlist[0]){
+                                item.checked = true
+                            }
+                            else{
+                                item.checked = false
+                            }
+                        })
+                    }
+                    else{
+                        defaultboxes.forEach((item) => {
+                            item.checked = false
+                            }
+                        )
+                    }
+                    let tableData = JSON.parse(document.getElementById('table_json').textContent);
+                    renderTable(tableData);
+                    const endTime = performance.now()
+                    console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
                 }
             };
     
             xhr.send();
         }
     });
-    </script>
+
+
+    function renderTable(tableData) {
+        let html = '<table>';
+
+        for(var i = 0; i < tableData.length; i++) {
+            html += '<tr>';
+            if(i === 0){
+                tableData[i].forEach(cell => {
+                    html += `<th>${cell}</th>`;
+                });
+            }
+            else{
+                for(var j = 0; j< tableData[0].length; j++){
+                    if(j === 0){
+                        html += `<td><a class=aladinlink id="a${i}" onclick="return false;" href="#">${tableData[i][j]}</a></td>`
+                    }
+                    else{
+                        html += `<td>${tableData[i][j]}</td>`;
+                    }
+                }
+                //tableData[i].forEach(cell => {
+                //    html += `<td>${cell}</td>`;
+                //});
+            }
+            html += '</tr>';
+        }
+        html += '</table>'
+        document.getElementById('partial-table-container').innerHTML = html;
+    }
+    let firstTableData = JSON.parse(document.getElementById('table_json').textContent);
+    renderTable(firstTableData);
+
+    var status = "less";
+
+    function toggleColumns()
+    {
+        //var html=document.getElementById("form-columns").innerHTML;
+        if (status == "less") {
+            console.log(status)
+            document.getElementById("form-columns-id").style.display="flex";
+            document.getElementById("toggleButton").innerText = "Hide columns";
+            status = "more";
+        } else if (status == "more") {
+            console.log(status)
+            document.getElementById("form-columns-id").style.display="none";
+            document.getElementById("toggleButton").innerText = "Show all columns";
+            status = "less"
+        }
+    }
+</script>
 {% endblock %}

@@ -1,11 +1,6 @@
-<table>
-    {% for row in table %}
-        <tr>
-        {% for cell in row %}
-            {% if forloop.parentloop.first %} <th> {% else %} <td> {% endif %}
-                {{ cell }}
-            {% if forloop.parentloop.first %} </th> {% else %} </td> {% endif %}
-        {% endfor %}
-        </tr>
-    {% endfor %}
-</table>
+<div id="partial-table-container">
+    <!-- The table will be rendered here by JavaScript -->
+</div>
+{{ table|json_script:"table_json" }}
+{{savedfields|json_script:"fields_json" }}
+{{defaultselected|json_script:"default_json" }}

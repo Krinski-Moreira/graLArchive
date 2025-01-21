@@ -15,3 +15,12 @@ class CreatefieldsForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         choices=options,
     )
+
+class CreatedefaultForm(forms.Form):
+
+    options = ["Default", "All columns"]
+
+    defaultform = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        choices=options,
+    )
