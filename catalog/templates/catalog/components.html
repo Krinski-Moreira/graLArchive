@@ -1,7 +1,7 @@
 {% extends "base_generic.html" %}
 {% load static %}
 {% block content %}
-  <h1>Systems table</h1>
+  <h1>Components table</h1>
   <form action="" method="get">
     {% csrf_token %}
     <!-- {{ form }} -->
@@ -18,7 +18,7 @@
     {% for option in options %}
         <div class="form-check">
             <label for={{option.0}}>
-            <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
+            <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsformcomp" {% if option.1 in savedfields %}checked{% endif %}>
             <div class="form-label" id={{option.1}}> {{option.1}} <span id={{option.2}} class=labelpopup style="display: none">text </span> </div></label>
         </div>
     {% endfor %}
@@ -26,7 +26,11 @@
    <!-- <input type="submit" value="Submit"> -->
 </form>
 <button id="downloadbutton"><a>Download csv table</a></button>
- <!-- <table>
+<!--
+<button>
+    <a class="nav-link" id="downloadbutton" href="{% url 'export_csv_comp' %}?{%for selected_field in savedfields%}fieldsformcomp={{selected_field}}&{%endfor%}">Download csv table</a>
+</button>
+ <table> 
     {% for row in table %}
         <tr>
         {% for cell in row %}
@@ -55,13 +59,13 @@
         function updateTableDefault(value) {
             const tableContainer = document.getElementById('table-container');
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', `{% url 'lens' %}?defaultform=${value}`, true);
+            xhr.open('GET', `{% url 'components' %}?defaultform=${value}`, true);
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest2');
     
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                     tableContainer.innerHTML = xhr.responseText;
-                    const fieldboxes = document.querySelectorAll('input[name="fieldsform"]');
+                    const fieldboxes = document.querySelectorAll('input[name="fieldsformcomp"]');
                     let fields = JSON.parse(document.getElementById('fields_json').textContent);
                     fieldboxes.forEach((item) => {
                         if(containsObject(item.value, fields)){
@@ -94,10 +98,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const checkboxes = document.querySelectorAll('input[name="fieldsform"]');
+        const checkboxes = document.querySelectorAll('input[name="fieldsformcomp"]');
         const tableContainer = document.getElementById('table-container');
+        const downloader = document.getElementById("downloadbutton");
         const aladinlist = document.getElementsByClassName('aladinlink');
-        const downloader = document.getElementById("downloadbutton")
         // Convert HTMLCollection to an array
         const aladinArray = Array.from(aladinlist);
 
@@ -126,13 +130,14 @@
             }
 
             // Build the URL with query parameters
-            let baseUrl = "{% url 'export_csv' %}";
-            let queryParams = savedFields.map(field => `fieldsform=${encodeURIComponent(field)}`).join('&');
+            let baseUrl = "{% url 'export_csv_comp' %}";
+            let queryParams = savedFields.map(field => `fieldsformcomp=${encodeURIComponent(field)}`).join('&');
 
             // Create final URL and trigger the download
             let finalUrl = `${baseUrl}?${queryParams}`;
             window.location.href = finalUrl;
         });
+    
         
         const labelArray = document.querySelectorAll('.form-label');
     
@@ -214,7 +219,7 @@
                 .map(checkbox => checkbox.value);
     
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', `{% url 'lens' %}?fieldsform=${selectedFields.join('&fieldsform=')}`, true);
+            xhr.open('GET', `{% url 'components' %}?fieldsformcomp=${selectedFields.join('&fieldsformcomp=')}`, true);
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     
             xhr.onreadystatechange = function () {

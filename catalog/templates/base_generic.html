@@ -12,7 +12,7 @@
       crossorigin="anonymous">
     <!-- Add additional CSS in static file -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1" />
     <script src="{% static 'javascript.js' %}"></script>
   </head>
   <body>
@@ -21,7 +21,9 @@
             <nav>
                 <ul>
                 <a href="{% url 'index' %}">Home</a>
-                <a href="{% url 'lens' %}">Database</a>
+                <a href="{% url 'lens' %}">Systems</a>
+                <a href="{% url 'components' %}">Components</a>
+                <a href="{% url 'download' %}">Download</a>
                 <a href="{% url 'help' %}">Help</a>
                 </ul>
             <nav>

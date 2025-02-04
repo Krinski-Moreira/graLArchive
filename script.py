@@ -1,19 +1,23 @@
-csv_filepathname = "C:/Users/otavio.LAPTOP-D1DO624H/GaiaGraL_database_05082024_DR4.csv"
+csv_filepathname = "C:/Users/otavio.LAPTOP-D1DO624H/GaiaGraL_database_20250129_DR4.csv"
 csv_filepathnameLens="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Lens.csv"
 csv_filepathnameComponents="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Components.csv"
-your_djangoproject_home="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/graLArchive"
+djangoproject_home="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/graLArchive"
 
 import sys,os, django
-sys.path.append(your_djangoproject_home)
+sys.path.append(djangoproject_home)
 os.environ['DJANGO_SETTINGS_MODULE'] ='graLArchive.settings'
 django.setup()
 
 from catalog.models import Lens, LensComponent
 
 import pandas as pd
-
+from datetime import datetime
 
 Lens.objects.all().delete()
+
+with open(djangoproject_home+'/catalog/static/date.txt', 'w') as filedate:
+    now = datetime.today().strftime('%Y-%m-%d')
+    filedate.write(now)
 
 df = pd.read_csv(csv_filepathname, na_filter=False, keep_default_na=False)
 
@@ -78,6 +82,8 @@ print(compfields)
 #table_df[lensfield]
 
 print("how often does this script run?")
+
+
 '''dataReaderLens = csv.reader(open(csv_filepathnameLens), delimiter=',', quotechar='"')
 
 for row in dataReaderLens:

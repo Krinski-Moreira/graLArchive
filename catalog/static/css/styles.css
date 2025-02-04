@@ -3,9 +3,19 @@
   position: sticky;
   overflow: hidden;
   background-color: #333;
-  top: 0;
+  /*top: 0;*/
+  margin-top: 0px;
   width: 100%;
   z-index: 1000; /* Ensures the navbar stays on top of other content */
+}
+
+footer {
+  position: fixed;
+  height: 30px;
+  bottom: 0px;
+  left: 10px;
+  right: 0px;
+  margin-bottom: 0px;
 }
 
 
@@ -54,6 +64,15 @@ div.form-columns {
   border: 1px solid #ccc;
   padding: 10px;
   z-index: 1000;
+}
+
+a {
+  outline-color: transparent;
+}
+
+.nav-link{
+  color: #6900ff;
+  text-decoration: underline
 }
 
 table {
