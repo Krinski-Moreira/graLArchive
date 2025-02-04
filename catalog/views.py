@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Lens, LensComponent
 from django.views import generic
-from .forms import CreatefieldsForm, CreatedefaultForm
+from .forms import CreatefieldsForm, CreatedefaultForm, CreatetypefilterForm
 import csv
 from django.http import HttpResponse
 import pandas as pd
@@ -19,7 +19,7 @@ from django.contrib.staticfiles import finders
 
 # Create your views here.
 
-def create_table_pd(fields):
+def create_table_pd(fields, filter= None):
     #print(fields)
     start_time = timezone.now()
     lensfields = [f.name for f in Lens._meta.get_fields() if f.name in fields]
@@ -49,6 +49,15 @@ def create_table_pd(fields):
     del lens_df
     del merged_df
     final_table = final_table.fillna('')
+    print("before: ", filter)
+    if(filter != None):
+        print("filter: ", filter)
+        if(filter == "doubles"):
+            print("Doubles!")
+            final_table = final_table[final_table["Type"] == "Double"]
+        elif(filter == "quads"):
+            print("Quads!")
+            final_table = final_table[final_table["Type"] == "Quad"]
 
     # Step 5: Convert the final DataFrame back to a list (optional, if needed)
     final_table_list = final_table.values.tolist()
@@ -134,6 +143,10 @@ def lens(request):
     fields = lensfields[2:]# + compfields[2:]
     #savedfields = request.session.get('sfields', fields)
     
+    typefilterform = CreatetypefilterForm()
+    typefilterform_values = request.GET.getlist('typefilterform')
+    print(typefilterform_values)
+
     defaultform = CreatedefaultForm()
     defaultform_values = request.GET.getlist('defaultform')
     print(defaultform_values)
@@ -163,7 +176,11 @@ def lens(request):
         else:
             defaultform_values = []
 
-    table = create_table_pd(savedfields)
+    if not typefilterform_values:
+        table = create_table_pd(savedfields)
+    else:
+        print("where??", typefilterform_values[0])
+        table = create_table_pd(savedfields, typefilterform_values[0])
 
     gc.collect()
     #QuerySet.explain()
@@ -209,6 +226,10 @@ def components(request):
     fields = [lensfields[2]] + compfields[2:6] + lensfields[3:] + compfields[7:]
     #savedfields = request.session.get('sfields', fields)
     
+    typefilterform = CreatetypefilterForm()
+    typefilterform_values = request.GET.getlist('typefilterform')
+    print("nandedayoo: ",typefilterform_values)
+
     defaultform = CreatedefaultForm()
     defaultform_values = request.GET.getlist('defaultform')
     print("defaultform_values")
@@ -240,7 +261,12 @@ def components(request):
         else:
             defaultform_values = []
 
-    table = create_table_pd(savedfields)
+    if not typefilterform_values:
+        print("whyy??", typefilterform_values)
+        table = create_table_pd(savedfields)
+    else:
+        print("where??", typefilterform_values[0])
+        table = create_table_pd(savedfields, typefilterform_values[0])
 
     gc.collect()
     #QuerySet.explain()

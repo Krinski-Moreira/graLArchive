@@ -7,11 +7,23 @@
     <!-- {{ form }} -->
     <div class="default-form">
         <label for="defaultid">
-        <input class="form-check-input" type="checkbox" value="default" id = "defaultid" name="defaultform", onclick=onlyOne(this) checked>
+        <input class="form-check-input" type="checkbox" value="default" id = "defaultid" name="defaultform", onclick=clickboxes(this) checked>
         Default</label>
         <label for="allid">
-        <input class="form-check-input" type="checkbox" value="all" id = "allid" name="defaultform", onclick=onlyOne(this)>
+        <input class="form-check-input" type="checkbox" value="all" id = "allid" name="defaultform", onclick=clickboxes(this)>
        All columns</label>
+    </div>
+    <span>Filter:</span>
+    <div class="type-form">
+        <label for="typeallid">
+        <input class="form-check-input" type="checkbox" value="typeall" id = "typeallid" name="typeform", onclick=clickboxes(this) checked>
+        All</label>
+        <label for="doublesid">
+        <input class="form-check-input" type="checkbox" value="doubles" id = "doublesid" name="typeform", onclick=clickboxes(this)>
+        Doubles</label>
+        <label for="quadsid">
+        <input class="form-check-input" type="checkbox" value="quads" id = "quadsid" name="typeform", onclick=clickboxes(this)>
+        Quads</label>
     </div>
     <a id="toggleButton" onclick="toggleColumns(); return false" href="#">Show all columns</a>
     <div class="form-columns" id = "form-columns-id">  
@@ -44,64 +56,99 @@
 <script type="text/javascript" src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js" charset="utf-8"></script>
 
 <script>
-    function onlyOne(checkbox) {
-        var checkboxes = document.getElementsByName(checkbox.name)
-        checkboxes.forEach((item) => {
-            if (item !== checkbox) item.checked = false
-            else if(item.checked == true){
-                updateTableDefault(item.value);
-            }
-        })
-        function updateTableDefault(value) {
-            const tableContainer = document.getElementById('table-container');
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', `{% url 'lens' %}?defaultform=${value}`, true);
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest2');
-    
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                    tableContainer.innerHTML = xhr.responseText;
-                    const fieldboxes = document.querySelectorAll('input[name="fieldsform"]');
-                    let fields = JSON.parse(document.getElementById('fields_json').textContent);
-                    fieldboxes.forEach((item) => {
-                        if(containsObject(item.value, fields)){
-                            item.checked = true
-                        }
-                        else{
-                            item.checked = false
-                        }
-                    })
-                    const startTime = performance.now()
-                    let tableData = JSON.parse(document.getElementById('table_json').textContent);
-                    renderTable(tableData);
-                    const endTime = performance.now()
-                    console.log(`Call took ${endTime - startTime} milliseconds`)
+    function clickboxes(checkbox){
+        var defaultcheckboxes = document.getElementsByName('defaultform');
+        var filtercheckboxes = document.getElementsByName('typeform');
+        var defaultvalue = ""
+        var filtervalue = ""
+        if(checkbox.name === 'defaultform'){
+            defaultcheckboxes.forEach((item) => {
+                if (item !== checkbox) item.checked = false
+                else if(item.checked == true){
+                    defaultvalue = item.value
                 }
-            };
-    
-            xhr.send();
-        }
-        function containsObject(obj, list) {
-            var i;
-            for (i = 0; i < list.length; i++) {
-                if (list[i] === obj) {
-                    return true;
+            })
+            filtercheckboxes.forEach((item) => {
+                if(item.checked == true){
+                    filtervalue = item.value
                 }
-            }
-        
-            return false;
+            })
         }
+        else{
+            filtercheckboxes.forEach((item) => {
+                if (item !== checkbox) item.checked = false
+                else if(item.checked == true){
+                    filtervalue = item.value
+                }
+            })
+            defaultcheckboxes.forEach((item) => {
+                if(item.checked == true){
+                    defaultvalue = item.value
+                }
+            })
+        }
+        updateTableDefault(defaultvalue, filtervalue)
+    }
+
+    function updateTableDefault(defaultvalue, filtervalue) {
+        const tableContainer = document.getElementById('table-container');
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `{% url 'lens' %}?defaultform=${defaultvalue}&typefilterform=${filtervalue}`, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest2');
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                tableContainer.innerHTML = xhr.responseText;
+                const fieldboxes = document.querySelectorAll('input[name="fieldsform"]');
+                let fields = JSON.parse(document.getElementById('fields_json').textContent);
+                fieldboxes.forEach((item) => {
+                    if(containsObject(item.value, fields)){
+                        item.checked = true
+                    }
+                    else{
+                        item.checked = false
+                    }
+                })
+                const startTime = performance.now()
+                let tableData = JSON.parse(document.getElementById('table_json').textContent);
+                renderTable(tableData);
+                const endTime = performance.now()
+                console.log(`Call took ${endTime - startTime} milliseconds`)
+            }
+        };
+
+        xhr.send();
+    }
+    function containsObject(obj, list) {
+        var i;
+        for (i = 0; i < list.length; i++) {
+            if (list[i] === obj) {
+                return true;
+            }
+        }
+    
+        return false;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         const checkboxes = document.querySelectorAll('input[name="fieldsform"]');
+
         const tableContainer = document.getElementById('table-container');
         const aladinlist = document.getElementsByClassName('aladinlink');
         const downloader = document.getElementById("downloadbutton")
         // Convert HTMLCollection to an array
         const aladinArray = Array.from(aladinlist);
 
+
         checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                updateTable();
+            });
+        });
+
+        const typecheckboxes = document.querySelectorAll('input[name="typeform"]');
+
+        typecheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function () {
                 updateTable();
             });
@@ -209,12 +256,20 @@
         }
     
         function updateTable() {
+            var filtercheckboxes = document.getElementsByName('typeform');
+            var filtervalue = ""
+            filtercheckboxes.forEach((item) => {
+                if(item.checked == true){
+                    filtervalue = item.value
+                }
+            })
+
             const selectedFields = Array.from(checkboxes)
                 .filter(checkbox => checkbox.checked)
                 .map(checkbox => checkbox.value);
     
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', `{% url 'lens' %}?fieldsform=${selectedFields.join('&fieldsform=')}`, true);
+            xhr.open('GET', `{% url 'lens' %}?typefilterform=${filtervalue}&fieldsform=${selectedFields.join('&fieldsform=')}`, true);
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     
             xhr.onreadystatechange = function () {

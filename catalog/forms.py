@@ -24,3 +24,12 @@ class CreatedefaultForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         choices=options,
     )
+
+class CreatetypefilterForm(forms.Form):
+
+    options = ["All", "Doubles", "Quads"]
+
+    defaultform = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        choices=options,
+    )
