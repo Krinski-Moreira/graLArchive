@@ -17,16 +17,16 @@ class Lens(models.Model):
     source_id_DR3 = models.BigIntegerField(null=True, blank=True)
     gravLensName = models.CharField(max_length=30, null=True, blank=True)
     compId = models.SmallIntegerField(null=True, blank=True)
-    GraL = models.CharField(max_length=5, choices=Boolean_class.choices, blank=False)
     Max_separation = models.FloatField(null=True, blank=True)
-    Author = models.CharField(max_length=30, null=True, blank=True)
     Nb_of_published_components = models.SmallIntegerField(null=True, blank=True)
     BibCode = models.CharField(max_length=30, null=True, blank=True)
-    RA_mean = models.FloatField(null=True, blank=True)
-    DEC_mean = models.FloatField(null=True, blank=True)
-    z_source = models.FloatField(null=True, blank=True)
-    z_lens = models.FloatField(null=True, blank=True)
-    z_bibcode = models.CharField(max_length=30, null=True, blank=True)
+    RA_center = models.FloatField(null=True, blank=True, help_text='RA center [°]')
+    DEC_center = models.FloatField(null=True, blank=True, help_text='DEC center [°]')
+    RA_center_sexa = models.CharField(max_length=30, null=True, blank=True, help_text='RA center [d:mm:ss.ss]')
+    DEC_center_sexa = models.CharField(max_length=30, null=True, blank=True, help_text='DEC center [d:mm:ss.ss]')
+    z_source = models.FloatField(null=True, blank=True, help_text='z source')
+    z_lens = models.FloatField(null=True, blank=True, help_text='z lens')
+    z_bibcode = models.CharField(max_length=30, null=True, blank=True, help_text='z bibcode')
 
     def __str__(self):
         return self.Name
@@ -37,10 +37,10 @@ class Lens(models.Model):
 class LensComponent(models.Model):
     Name = models.ForeignKey(Lens, on_delete=models.CASCADE)
     Component = models.CharField(max_length=30)
-    RA_best = models.FloatField(null=True, blank=True)
-    DEC_best = models.FloatField(null=True, blank=True)
-    RA_sexa = models.CharField(max_length=30, null=True, blank=True)
-    DEC_sexa = models.CharField(max_length=30, null=True, blank=True)
+    RA_best = models.FloatField(null=True, blank=True, help_text='RA best [°]')
+    DEC_best = models.FloatField(null=True, blank=True, help_text='DEC best [°]')
+    RA_sexa = models.CharField(max_length=30, null=True, blank=True, help_text='RA best [d:mm:ss.ss]')
+    DEC_sexa = models.CharField(max_length=30, null=True, blank=True, help_text='DEC best [d:mm:ss.ss]')
     DR3 = models.CharField(max_length=5, choices=Boolean_class.choices, blank=False)
     FPR = models.CharField(max_length=5, choices=Boolean_class.choices, blank=False)
     RA_pub = models.FloatField(null=True, blank=True)
@@ -110,4 +110,4 @@ class LensComponent(models.Model):
     #e_W4 = models.FloatField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.Name} {self.Component}'
+        return f'{self.Name}_{self.Component}'

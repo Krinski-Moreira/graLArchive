@@ -21,7 +21,7 @@ with open(djangoproject_home+'/catalog/static/date.txt', 'w') as filedate:
 
 df = pd.read_csv(csv_filepathname, na_filter=False, keep_default_na=False)
 
-table_df = df[df["Confirmed"] != 0]
+table_df = df[(df["Confirmed"] != 0) & ((df["Type"] == "Double") | (df["Type"] == "Quad"))]
 
 columns = table_df.columns.tolist()
 lensfields = [f.name for f in Lens._meta.get_fields()]

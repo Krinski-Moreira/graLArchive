@@ -85,7 +85,15 @@ thead, tbody {
   display: table;        /* Set these to display as table */
 }
 
-td, th {
+td{
+  border: 1px solid black;
+  padding: 10px;
+  line-height: 6px;
+  text-align: left;
+  min-width: 120px;      /* Minimum width for columns, adjust as necessary */ 
+}
+
+th{
   border: 1px solid black;
   padding: 8px;
   text-align: center;
@@ -100,3 +108,7 @@ tbody {
 /*thead {
   width: 100%;            Full width for header 
 } */
+
+#bold-help {
+  font-weight: bold;
+}

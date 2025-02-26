@@ -16,23 +16,53 @@ from django.utils.safestring import mark_safe
 
 from django.contrib.staticfiles import finders
 
+from django.views import generic
+
+import json
+
 
 # Create your views here.
 
-def create_table_pd(fields, filter= None):
+class lensDetailView(generic.DetailView):
+    model = Lens
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        lensfields = [f.name for f in Lens._meta.get_fields()]
+        compfields = [f.name for f in LensComponent._meta.get_fields()]
+        context["fieldnames"] = lensfields[2:]
+        fields = lensfields[2:] + compfields[2:]
+        name = context['lens']
+        fields1 = ["Name","RA_center_sexa", "DEC_center_sexa", "Type", "BibCode", "Max_separation", "z_source", "z_lens", "z_bibcode"]
+        table1, lens_id = create_table_pd(fields1,name=name)
+        fields2 = ["Name","Component","RA_best", "DEC_best","RA_sexa", "DEC_sexa"]
+        table2, lens_id = create_table_pd(fields2,name=name)
+        context["lens_id"] = lens_id
+        context['table1'] = table1
+        context['table2'] = table2
+        help_row = help_texts(fields)
+        context['help_row'] = help_row
+        return context
+
+def round_table_floats(value):
+    
+    return('{:.3f}'.format(value))
+
+def create_table_pd(fields, filter= None, name = False):
     #print(fields)
     start_time = timezone.now()
     lensfields = [f.name for f in Lens._meta.get_fields() if f.name in fields]
+    lensfields = [f.name for f in Lens._meta.get_fields()]
     compfields = [f.name for f in LensComponent._meta.get_fields() if f.name in fields]
     lensfields.append("id")
     compfields.append("Name_id")
+    if("lenscomponent" in lensfields):
+        lensfields.remove("lenscomponent")
     lens_data = Lens.objects.values(*lensfields)  # Get all Lens data as a QuerySet of dictionaries
-
     # Step 2: Load the data into Pandas DataFrames
     lens_df = pd.DataFrame(list(lens_data))  # Convert to DataFrame
-
     # Step 3: Merge the two DataFrames on Lens ID and Name_id in LensComponent
-    if(compfields == ['Name', 'Name_id']):
+    if(compfields == ['Name', 'Name_id'] or compfields == ['Name_id']):
         merged_df = lens_df
     else:
         component_data = LensComponent.objects.values(*compfields)  # Get all LensComponent data
@@ -45,32 +75,43 @@ def create_table_pd(fields, filter= None):
     reset_queries()
 
     # Step 4: Filter the fields (columns) you want to include in the final table
+    fields.append("id")
     final_table = merged_df[fields]
     del lens_df
     del merged_df
     final_table = final_table.fillna('')
-    print("before: ", filter)
     if(filter != None):
-        print("filter: ", filter)
         if(filter == "doubles"):
-            print("Doubles!")
             final_table = final_table[final_table["Type"] == "Double"]
         elif(filter == "quads"):
-            print("Quads!")
             final_table = final_table[final_table["Type"] == "Quad"]
+    id_list = final_table["id"].to_list()
+    final_table = final_table.drop('id', axis=1)
 
-    # Step 5: Convert the final DataFrame back to a list (optional, if needed)
+
+    if("Max_separation" in fields):
+        final_table["Max_separation"] = final_table["Max_separation"].map(round_table_floats)
+    
+    if(name != False):
+        final_table = final_table[final_table["Name"] == str(name)]
+        final_table = final_table.drop('Name', axis=1)
+        fields.remove("Name")
+        
+
+    # Convert the final DataFrame back to a list
+
     final_table_list = final_table.values.tolist()
     #final_table_json = final_table.to_json()
-    #print(final_table_json)
     del final_table
+    if("id" in fields):
+        fields.remove("id")
     final_table_list.insert(0, fields)
     end_time = timezone.now()
     elapsed_time = end_time - start_time
     print("duração create_table_pd:", elapsed_time.total_seconds())
     
 
-    return final_table_list
+    return final_table_list, id_list
 
 def create_table(fields):
     table = [fields]
@@ -104,14 +145,12 @@ def index(request):
     date = opendate()
 
     num_lenses = Lens.objects.all().count()
-    num_gaia = Lens.objects.filter(GraL="TRUE").count()
     num_quad = Lens.objects.filter(Type="Quad").count()
     num_double = Lens.objects.filter(Type="Double").count()
 
     context = {
         'date' : date,
         'num_lenses' : num_lenses,
-        'num_gaia' : num_gaia,
         'num_quad' : num_quad,
         'num_double' : num_double
     }
@@ -122,34 +161,34 @@ def help(request):
     lensfields = [f.name for f in Lens._meta.get_fields()]
     compfields = [f.name for f in LensComponent._meta.get_fields()]
     fields = lensfields[2:] + compfields[2:]
+    help_row = help_texts(fields)
 
     context = {
         'fields' : fields,
+        'help_row' : help_row
     }
     return render(request, 'catalog/help.html', context = context)
     
-def lens(request):
+def lenses(request):
     start_time = timezone.now()
     print(gc.get_stats())
     if(not(gc.isenabled())):
         gc.enable()
     #components = LensComponent.objects.values()
     #lenses = Lens.objects.values()
-    defaultlist = ["Name", "RA_mean", "DEC_mean", "Type", "Author", "BibCode", "Max_separation", "z_source", "z_lens", "z_bibcode"]
+    defaultlist = ["Name", "RA_center", "DEC_center","RA_center_sexa", "DEC_center_sexa", "Type", "BibCode", "Max_separation", "z_source", "z_lens", "z_bibcode"]
     request.session['defaultfields'] = defaultlist
     lensfields = [f.name for f in Lens._meta.get_fields()]
     #compfields = [f.name for f in LensComponent._meta.get_fields()]
-    #print(compfields, lensfields)
     fields = lensfields[2:]# + compfields[2:]
     #savedfields = request.session.get('sfields', fields)
     
     typefilterform = CreatetypefilterForm()
     typefilterform_values = request.GET.getlist('typefilterform')
-    print(typefilterform_values)
+
 
     defaultform = CreatedefaultForm()
     defaultform_values = request.GET.getlist('defaultform')
-    print(defaultform_values)
 
     form = CreatefieldsForm()
     options = []
@@ -177,10 +216,12 @@ def lens(request):
             defaultform_values = []
 
     if not typefilterform_values:
-        table = create_table_pd(savedfields)
+        table, lens_id = create_table_pd(savedfields)
     else:
-        print("where??", typefilterform_values[0])
-        table = create_table_pd(savedfields, typefilterform_values[0])
+        table, lens_id = create_table_pd(savedfields, typefilterform_values[0])
+
+
+    help_row = help_texts(fields)
 
     gc.collect()
     #QuerySet.explain()
@@ -193,13 +234,14 @@ def lens(request):
         context = {
             'table' : table,
             "defaultselected": defaultform_values,
-            "savedfields": savedfields
+            "savedfields": savedfields,
+            "lens_id": lens_id,
+            "help_row": help_row
         }
         print(defaultform_values)
         return render(request, 'catalog/table_partial.html', context=context)
 
     defaultform_values = ["default"]
-    print(defaultform_values)
     context = {
         'table' : table,
         "defaultform": defaultform,
@@ -207,7 +249,9 @@ def lens(request):
         "form": form,
         "options": options,
         "savedfields": savedfields,
-        "defaultfields": defaultlist
+        "defaultfields": defaultlist,
+        "lens_id": lens_id,
+        "help_row": help_row
     }
     return render(request, 'catalog/lens_list.html', context=context)
 
@@ -218,32 +262,30 @@ def components(request):
         gc.enable()
     #components = LensComponent.objects.values()
     #lenses = Lens.objects.values()
-    defaultlistcomp = ["Name", "Component","RA_best", "DEC_best","RA_sexa", "DEC_sexa", "Type", "Author", "BibCode", "Max_separation", "z_source", "z_lens", "z_bibcode"]
-    request.session['defaultfieldscomp'] = defaultlistcomp
+    defaultlistcomp = ["Name", "Component","RA_best", "DEC_best","RA_sexa", "DEC_sexa", "Type", "BibCode", "Max_separation", "z_source", "z_lens", "z_bibcode"]
+    request.session['defaultfields'] = defaultlistcomp
     lensfields = [f.name for f in Lens._meta.get_fields()]
     compfields = [f.name for f in LensComponent._meta.get_fields()]
     #print(compfields, lensfields)
-    fields = [lensfields[2]] + compfields[2:6] + lensfields[3:] + compfields[7:]
+    fields = [lensfields[2]] + compfields[2:5] + lensfields[3:] + compfields[5:]
     #savedfields = request.session.get('sfields', fields)
     
     typefilterform = CreatetypefilterForm()
     typefilterform_values = request.GET.getlist('typefilterform')
-    print("nandedayoo: ",typefilterform_values)
 
     defaultform = CreatedefaultForm()
     defaultform_values = request.GET.getlist('defaultform')
-    print("defaultform_values")
-    print(defaultform_values)
+
+    help_row = help_texts(fields)
 
     form = CreatefieldsForm()
     options = []
     for i in range(len(fields)):
         options.append((i,fields[i], fields[i]+"popup"))
 
-    form_values = request.GET.getlist('fieldsformcomp')
+    form_values = request.GET.getlist('fieldsform')
     request.session['sfields'] = form_values
     savedfields = form_values
-    print(savedfields, form_values)
     if len(savedfields) == 0:
         savedfields = defaultlistcomp
         #defaultform_values = ["default"]
@@ -262,11 +304,10 @@ def components(request):
             defaultform_values = []
 
     if not typefilterform_values:
-        print("whyy??", typefilterform_values)
-        table = create_table_pd(savedfields)
+        table, lens_id = create_table_pd(savedfields)
     else:
-        print("where??", typefilterform_values[0])
-        table = create_table_pd(savedfields, typefilterform_values[0])
+        table, lens_id = create_table_pd(savedfields, typefilterform_values[0])
+
 
     gc.collect()
     #QuerySet.explain()
@@ -276,17 +317,16 @@ def components(request):
     if(request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.headers.get('x-requested-with') == 'XMLHttpRequest2'):
         render_start_time = timezone.now()
         print("duração lens function:", (render_start_time - start_time).total_seconds())
-        print("aaaaa: ", savedfields)
         context = {
             'table' : table,
             "defaultselected": defaultform_values,
-            "savedfields": savedfields
+            "savedfields": savedfields,
+            "lens_id": lens_id,
+            "help_row": help_row
         }
-        print(defaultform_values)
         return render(request, 'catalog/table_partial.html', context=context)
 
     defaultform_values = ["default"]
-    print(defaultform_values)
     context = {
         'table' : table,
         "defaultform": defaultform,
@@ -294,10 +334,26 @@ def components(request):
         "form": form,
         "options": options,
         "savedfields": savedfields,
-        "defaultfieldscomp": defaultlistcomp
+        "defaultfields": defaultlistcomp,
+        "lens_id": lens_id,
+        "help_row": help_row
     }
-    print("aaaabbbb: ", savedfields)
     return render(request, 'catalog/components.html', context=context)
+
+def help_texts(fields):
+    lensfields = [f.name for f in Lens._meta.get_fields()]
+    compfields = [f.name for f in LensComponent._meta.get_fields()]
+    help_dict = {}
+    for field in fields:
+        if(field in lensfields):
+            help_text=Lens._meta.get_field(field).help_text
+        elif(field in compfields):
+            help_text=LensComponent._meta.get_field(field).help_text
+        if(help_text == ""):
+            help_text = field
+        help_dict[field] = help_text
+    help_json = json.dumps(help_dict)
+    return help_json
 
 def download(request):
     date = opendate()
@@ -305,7 +361,7 @@ def download(request):
     compfields = [f.name for f in LensComponent._meta.get_fields()]
     #print(compfields, lensfields)
     fields = lensfields[2:]
-    compfields = [lensfields[2]] + compfields[2:6] + lensfields[3:] + compfields[7:]
+    compfields = [lensfields[2]] + compfields[2:5] + lensfields[3:] + compfields[5:]
     context = {
         'date' : date,
         'lensfields': fields,
@@ -322,14 +378,16 @@ def export_csv_comp(request):
     )
 
     writer = csv.writer(response)
+    typefilterform_values = request.GET.getlist('typefilterform')
     savedfields = request.GET.getlist('fieldsformcomp')
-    print("Selected fields:", savedfields)
-    #print("test", savedfields)
     if not savedfields:
-        defaultlist = request.session.get('defaultfieldscomp')
+        defaultlist = request.session.get('defaultfields')
         savedfields = defaultlist
-        print("why, ", defaultlist)
-    table = create_table_pd(savedfields)
+
+    if not typefilterform_values:
+        table, id_list = create_table_pd(savedfields)
+    else:
+        table, id_list = create_table_pd(savedfields, typefilterform_values[0])
     for row in table:
         writer.writerow(row)
 
@@ -340,16 +398,20 @@ def export_csv(request):
     date = opendate()
     response = HttpResponse(
         content_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="graldatabase_system_version-{date}.csv"'},
+        headers={"Content-Disposition": f'attachment; filename="graldatabase_lenses_version-{date}.csv"'},
     )
 
     writer = csv.writer(response)
+    typefilterform_values = request.GET.getlist('typefilterform')
     savedfields = request.GET.getlist('fieldsform')
-    print("Selected fields:", savedfields)
     if not savedfields:
         defaultlist = request.session.get('defaultfields')
         savedfields = defaultlist
-    table = create_table_pd(savedfields)
+    
+    if not typefilterform_values:
+        table, id_list = create_table_pd(savedfields)
+    else:
+        table, id_list = create_table_pd(savedfields, typefilterform_values[0])
     for row in table:
         writer.writerow(row)
 

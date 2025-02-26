@@ -8,7 +8,7 @@ from .models import Lens, LensComponent
 # Register the Admin classes for LEns using the decorator
 @admin.register(Lens)
 class LensAdmin(admin.ModelAdmin):
-    list_display = ("Name", "Author", "GraL", "Max_separation")
+    list_display = ("Name", "Max_separation")
 
 # Register the Admin classes for LensComponent using the decorator
 @admin.register(LensComponent)

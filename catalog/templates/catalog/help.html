@@ -5,6 +5,7 @@
 <div id="helptext"></div>
 {{fields|json_script:"fields_json" }}
 <script>
+        let help_row = {{ help_row|safe }};
         fields = JSON.parse(document.getElementById('fields_json').textContent)
         var html = ""
         get_help_text(fields, 'helptext')
@@ -23,7 +24,7 @@
     function help_text(json, fields, id){
         var html = "";
         fields.forEach(field => {
-            html += `<p id ="${field}">`+ field + ": ";
+            html += `<p id ="${field}">`+`<span id='bold-help'>`+ help_row[field] +`</span>`+ ": ";
             html += json[field] + '</p>';
         });
         document.getElementById(id).innerHTML = html;

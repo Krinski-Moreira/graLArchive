@@ -30,7 +30,7 @@
     {% for option in options %}
         <div class="form-check">
             <label for={{option.0}}>
-            <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsformcomp" {% if option.1 in savedfields %}checked{% endif %}>
+            <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
             <div class="form-label" id={{option.1}}> {{option.1}} <span id={{option.2}} class=labelpopup style="display: none">text </span> </div></label>
         </div>
     {% endfor %}
@@ -56,43 +56,11 @@
 <div id="table-container">
     {% include 'catalog/table_partial.html' with table=table %}
 </div>
-
-<script type="text/javascript" src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js" charset="utf-8"></script>
+<script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
 
 <script>
-    function clickboxes(checkbox){
-        var defaultcheckboxes = document.getElementsByName('defaultform');
-        var filtercheckboxes = document.getElementsByName('typeform');
-        var defaultvalue = ""
-        var filtervalue = ""
-        if(checkbox.name === 'defaultform'){
-            defaultcheckboxes.forEach((item) => {
-                if (item !== checkbox) item.checked = false
-                else if(item.checked == true){
-                    defaultvalue = item.value
-                }
-            })
-            filtercheckboxes.forEach((item) => {
-                if(item.checked == true){
-                    filtervalue = item.value
-                }
-            })
-        }
-        else{
-            filtercheckboxes.forEach((item) => {
-                if (item !== checkbox) item.checked = false
-                else if(item.checked == true){
-                    filtervalue = item.value
-                }
-            })
-            defaultcheckboxes.forEach((item) => {
-                if(item.checked == true){
-                    defaultvalue = item.value
-                }
-            })
-        }
-        updateTableDefault(defaultvalue, filtervalue)
-    }
+
+    let help_row = {{ help_row|safe }};
 
     function updateTableDefault(defaultvalue, filtervalue) {
         const tableContainer = document.getElementById('table-container');
@@ -103,7 +71,7 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 tableContainer.innerHTML = xhr.responseText;
-                const fieldboxes = document.querySelectorAll('input[name="fieldsformcomp"]');
+                const fieldboxes = document.querySelectorAll('input[name="fieldsform"]');
                 let fields = JSON.parse(document.getElementById('fields_json').textContent);
                 fieldboxes.forEach((item) => {
                     if(containsObject(item.value, fields)){
@@ -115,7 +83,8 @@
                 })
                 const startTime = performance.now()
                 let tableData = JSON.parse(document.getElementById('table_json').textContent);
-                renderTable(tableData);
+                let lens_id = JSON.parse(document.getElementById('id_json').textContent);
+                renderTable(tableData, "{% url 'lenses' %}", "{% url 'help' %}", 'partial-table-container', help_row, lens_id);
                 const endTime = performance.now()
                 console.log(`Call took ${endTime - startTime} milliseconds`)
             }
@@ -123,34 +92,15 @@
 
         xhr.send();
     }
-    function containsObject(obj, list) {
-        var i;
-        for (i = 0; i < list.length; i++) {
-            if (list[i] === obj) {
-                return true;
-            }
-        }
     
-        return false;
-    }
     document.addEventListener('DOMContentLoaded', function () {
-        const checkboxes = document.querySelectorAll('input[name="fieldsformcomp"]');
+        const checkboxes = document.querySelectorAll('input[name="fieldsform"]');
         const tableContainer = document.getElementById('table-container');
         const downloader = document.getElementById("downloadbutton");
-        const aladinlist = document.getElementsByClassName('aladinlink');
-        // Convert HTMLCollection to an array
-        const aladinArray = Array.from(aladinlist);
 
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function () {
                 updateTable();
-            });
-        });
-
-        aladinArray.forEach(link => {
-            link.addEventListener('click', function () {
-                var index = Number(link.id.substring(1));
-                showAladin(index);
             });
         });
         
@@ -167,10 +117,11 @@
 
             // Build the URL with query parameters
             let baseUrl = "{% url 'export_csv_comp' %}";
-            let queryParams = savedFields.map(field => `fieldsformcomp=${encodeURIComponent(field)}`).join('&');
+            let queryParams = savedFields.map(field => `fieldsform=${encodeURIComponent(field)}`).join('&');
+            var filtervalue = get_filter_value();
 
             // Create final URL and trigger the download
-            let finalUrl = `${baseUrl}?${queryParams}`;
+            let finalUrl = `${baseUrl}?typefilterform=${filtervalue}&${queryParams}`;
             window.location.href = finalUrl;
         });
     
@@ -191,79 +142,16 @@
                 popup.style.display = 'none';
             });
         });
-
-        function showAladin(index){
-            var table = JSON.parse(document.getElementById('table_json').textContent);
-            var name = table[index][0];
-            var ra = table[index][13];
-            var dec = table[index][14];
-            var loc = ra + " " + dec;
-            var typelens = table[index][1]
-            //var aladin_id = `aladin${index}`;
-            //document.getElementById(aladin_id).style = "width:400px;height:400px;";
-            var max_sep = table[index][9];
-            if(max_sep == 0){
-                max_sep = 5.0
-            }
-            fov_value = (1.0/3600.)*max_sep*2.
-            console.log(fov_value, loc);
-            var myWindow = window.open('','','width=550,height=600');
-            var doc = myWindow.document;
-            // Assign variables to window object
-            myWindow.aladinData = {
-                name: table[index][0],
-                ra: table[index][1],
-                dec: table[index][2],
-                type: typelens,
-                loc: ra + " " + dec,
-                fovValue: (1.0 / 3600) * max_sep * 7.5
-            };
-            doc.open();
-            doc.write(`
-                <html>
-                <head>
-                    <title>Aladin</title>
-                    <style>
-                        body {
-                            height: 100vh;
-                            margin: 0;
-                    </style>
-                </head>
-                <body>
-                    <div id="text" style="text-align: center;"></div>
-                    <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%;">
-                        <div id="aladin-lite-div" style="width: 500px; height: 500px;"></div>
-                    </div>
-                </body>
-                </html>
-            `);
-            var aladinlibrary = doc.createElement('script');
-            aladinlibrary.src = 'https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js'
-            aladinlibrary.charset = "utf-8"
-            doc.head.appendChild(aladinlibrary);
-            var script = doc.createElement('script');
-            script.src = '{% static "aladin.js" %}';
-            aladinlibrary.onload = function() {
-                doc.head.appendChild(script);
-            };
-            doc.close();
-        }
     
         function updateTable() {
-            var filtercheckboxes = document.getElementsByName('typeform');
-            var filtervalue = ""
-            filtercheckboxes.forEach((item) => {
-                if(item.checked == true){
-                    filtervalue = item.value
-                }
-            })
+            var filtervalue = get_filter_value()
 
             const selectedFields = Array.from(checkboxes)
                 .filter(checkbox => checkbox.checked)
                 .map(checkbox => checkbox.value);
     
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', `{% url 'components' %}?typefilterform=${filtervalue}&fieldsformcomp=${selectedFields.join('&fieldsformcomp=')}`, true);
+            xhr.open('GET', `{% url 'components' %}?typefilterform=${filtervalue}&fieldsform=${selectedFields.join('&fieldsform=')}`, true);
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     
             xhr.onreadystatechange = function () {
@@ -289,7 +177,8 @@
                         )
                     }
                     let tableData = JSON.parse(document.getElementById('table_json').textContent);
-                    renderTable(tableData);
+                    let lens_id = JSON.parse(document.getElementById('id_json').textContent);
+                    renderTable(tableData, "{% url 'lenses' %}", "{% url 'help' %}", 'partial-table-container', help_row, lens_id);
                     const endTime = performance.now()
                     console.log(`Call to doSomething took ${endTime - startTime} milliseconds`)
                 }
@@ -299,78 +188,10 @@
         }
     });
 
-    
-    function renderTable(tableData) {
-        let fragment = document.createDocumentFragment();
-        let table = document.createElement('table');
-        let helpBaseUrl = "{% url 'help' %}";
-    
-        tableData.forEach((rowData, rowIndex) => {
-            let row = document.createElement('tr');
-    
-            rowData.forEach((cellData, colIndex) => {
-                let cell;
-                if (rowIndex === 0) {
-                    cell = document.createElement('th');
-                    cell.innerHTML = `<a href="${helpBaseUrl}#${cellData}">${cellData}</a>`;
-                } else {
-                    cell = document.createElement('td');
-                    if (colIndex === 0) {
-                        cell.innerHTML = `<a class="aladinlink" id="a${rowIndex}" data-index="${rowIndex}" href="#">${cellData}</a>`;
-                    } else {
-                        cell.textContent = cellData;
-                    }
-                }
-                row.appendChild(cell);
-            });
-    
-            table.appendChild(row);
-        });
-    
-        fragment.appendChild(table);
-    
-        const container = document.getElementById('partial-table-container');
-        container.innerHTML = ''; // Clear previous content
-        container.appendChild(fragment);
-    }
-    
-    // Event delegation to handle all future clicks on aladin links
-    document.getElementById('partial-table-container').addEventListener('click', function (event) {
-        if (event.target.classList.contains('aladinlink')) {
-            //event.preventDefault();
-            const index = event.target.dataset.index;
-            showAladin(index);
-        }
-    });
 
-    /*function renderTable(tableData) {
-        let html = '<table>';
-        let helpBaseUrl = "{% url 'help' %}"; // Get the base URL for the help page from Django
-
-        for(var i = 0; i < tableData.length; i++) {
-            html += '<tr>';
-            if(i === 0){
-                for(var j = 0; j< tableData[0].length; j++){
-                    html += `<th id="header${j}" class="table-header"><a href="${helpBaseUrl}#${tableData[i][j]}">${tableData[i][j]}</a></th>`;
-                };
-            }
-            else{
-                for(var j = 0; j< tableData[0].length; j++){
-                    if(j === 0){
-                        html += `<td><a class=aladinlink id="a${i}" onclick="return false;" href="#">${tableData[i][j]}</a></td>`
-                    }
-                    else{
-                        html += `<td>${tableData[i][j]}</td>`;
-                    }
-                }
-            }
-            html += '</tr>';
-        }
-        html += '</table>'
-        document.getElementById('partial-table-container').innerHTML = html;
-    }*/
     let firstTableData = JSON.parse(document.getElementById('table_json').textContent);
-    renderTable(firstTableData);
+    let lens_id = JSON.parse(document.getElementById('id_json').textContent);
+    renderTable(firstTableData, "{% url 'lenses' %}", "{% url 'help' %}", 'partial-table-container', help_row, lens_id);
 
     var status = "less";
 
