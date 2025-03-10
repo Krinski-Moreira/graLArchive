@@ -30,9 +30,8 @@ class lensDetailView(generic.DetailView):
     model = Lens
 
     def get_object(self):
-        slug = self.kwargs.get("slug")
-        print(slug)
-        return get_object_or_404(Lens, Name__in=[lens.Name for lens in Lens.objects.all() if slugify(lens.Name) == slug])
+        name_url = self.kwargs.get("Name")
+        return get_object_or_404(Lens, Name__in=[lens.Name for lens in Lens.objects.all() if lens.Name == name_url])
     
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -94,8 +93,6 @@ def create_table_pd(fields, filter= None, name = False):
         elif(filter == "quads"):
             final_table = final_table[final_table["Type"] == "Quad"]
     name_list = final_table["Name"].to_list()
-    slug_list = [slugify(x) for x in name_list]
-
 
     if("Max_separation" in fields):
         final_table["Max_separation"] = final_table["Max_separation"].map(round_table_floats)
@@ -117,7 +114,7 @@ def create_table_pd(fields, filter= None, name = False):
     print("duração create_table_pd:", elapsed_time.total_seconds())
     
 
-    return final_table_list, slug_list
+    return final_table_list, name_list
 
 def create_table(fields):
     table = [fields]

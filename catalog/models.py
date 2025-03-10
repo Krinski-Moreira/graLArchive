@@ -31,9 +31,6 @@ class Lens(models.Model):
 
     def __str__(self):
         return self.Name
-    
-    def slug(self):
-         return slugify(self.Name)
 
     def get_absolute_url(self):
         return reverse('lens-name', args=[str(self.Name)])

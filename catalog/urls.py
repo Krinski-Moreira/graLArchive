@@ -9,5 +9,5 @@ urlpatterns = [
     path('export_csv_comp', views.export_csv_comp, name='export_csv_comp'),
     path('download/', views.download, name='download'),
     path('components/', views.components, name='components'),
-    path('lenses/<slug:slug>', views.lensDetailView.as_view(), name='lens_detail'),
+    path('lenses/<str:Name>', views.lensDetailView.as_view(), name='lens_detail'),
 ]
