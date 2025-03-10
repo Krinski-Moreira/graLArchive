@@ -20,11 +20,20 @@ from django.views import generic
 
 import json
 
+from django.shortcuts import get_object_or_404
+from django.utils.text import slugify
+
 
 # Create your views here.
 
 class lensDetailView(generic.DetailView):
     model = Lens
+
+    def get_object(self):
+        slug = self.kwargs.get("slug")
+        print(slug)
+        return get_object_or_404(Lens, Name__in=[lens.Name for lens in Lens.objects.all() if slugify(lens.Name) == slug])
+    
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
@@ -75,7 +84,6 @@ def create_table_pd(fields, filter= None, name = False):
     reset_queries()
 
     # Step 4: Filter the fields (columns) you want to include in the final table
-    fields.append("id")
     final_table = merged_df[fields]
     del lens_df
     del merged_df
@@ -85,8 +93,8 @@ def create_table_pd(fields, filter= None, name = False):
             final_table = final_table[final_table["Type"] == "Double"]
         elif(filter == "quads"):
             final_table = final_table[final_table["Type"] == "Quad"]
-    id_list = final_table["id"].to_list()
-    final_table = final_table.drop('id', axis=1)
+    name_list = final_table["Name"].to_list()
+    slug_list = [slugify(x) for x in name_list]
 
 
     if("Max_separation" in fields):
@@ -103,15 +111,13 @@ def create_table_pd(fields, filter= None, name = False):
     final_table_list = final_table.values.tolist()
     #final_table_json = final_table.to_json()
     del final_table
-    if("id" in fields):
-        fields.remove("id")
     final_table_list.insert(0, fields)
     end_time = timezone.now()
     elapsed_time = end_time - start_time
     print("duração create_table_pd:", elapsed_time.total_seconds())
     
 
-    return final_table_list, id_list
+    return final_table_list, slug_list
 
 def create_table(fields):
     table = [fields]
