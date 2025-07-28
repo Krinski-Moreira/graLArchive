@@ -1,6 +1,5 @@
 function renderTable(tableData, element_id, help_row, lens_id) {
     //console.log(lens_id)
-    //console.log("whyy")
     const baseUrl = window.myApp.lensesUrl
     const helpBaseUrl = window.myApp.helpUrl
     try {
