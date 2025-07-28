@@ -1,0 +1,81 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+<div style="text-align:center">
+<h1>{{lens.Name}}</h1>
+</div>
+<div style="flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%;">
+    <div id="aladin-lite-div" style="width: 500px; height: 500px;"></div>
+</div>
+<p></p>
+<p></p>
+<div id = 'partial-table-container1' style = "display: flex; justify-content: center;">
+</div>
+<p></p>
+<div id = 'partial-table-container_td' style = "display: flex; justify-content: center;">
+</div>
+<p></p>
+<div id = 'partial-table-container2' style = "display: flex; justify-content: center;">
+</div>
+<p></p>
+{{ table1|json_script:"table_json1" }}
+{{ table2|json_script:"table_json2" }}
+{{lens_id|json_script:"id_json" }}
+{{ fieldnames|json_script:"fieldnames_json" }}
+{{ table_td|json_script:"td_json" }}
+<script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
+<script src = https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js charset = utf-8> </script>
+<script>
+
+    window.myApp = {
+        helpUrl: "{% url 'help' %}",
+        lensesUrl: "{% url 'lenses' %}",
+        textUrl: "{% static "text.json" %}"
+    };
+
+    let surveyname;
+    let lens_object = "{{ lens }}"
+    console.log(lens_object)
+    console.log("{{fieldnames}}")
+    var fields = JSON.parse(document.getElementById('fieldnames_json').textContent);
+    fields.forEach(function (value, i) {
+        //var test 
+        console.log(value)
+    });
+    var dec = "{{ lens.DEC_center}}"
+    var ra = "{{ lens.RA_center}}"
+    loc = ra + " " + dec
+    var max_sep = "{{ lens.Max_separation}}"
+    if(max_sep == 0){
+        max_sep = 5.0
+    }
+    fov_value = (1.0/3600.)*max_sep*7.5
+    console.log(max_sep, fov_value)
+    if(dec < -31.5){
+        surveyname = 'CDS/P/DSS2/color'
+    }
+    else{
+        surveyname = 'CDS/P/PanSTARRS/DR1/color-i-r-g'
+    }
+    A.init.then(() => {
+        aladin = A.aladin('#aladin-lite-div', {survey: surveyname, fov: fov_value, target: loc});
+    });
+
+    let help_row = {{ help_row|safe }};
+    let lens_id = JSON.parse(document.getElementById('id_json').textContent);
+    let tableData1 = JSON.parse(document.getElementById('table_json1').textContent);
+    renderTable(tableData1, 'partial-table-container1', help_row, lens_id);
+    let tableData2 = JSON.parse(document.getElementById('table_json2').textContent);
+    renderTable(tableData2, 'partial-table-container2', help_row, lens_id);
+    let td_bool = "{{ has_td }}" == "True";
+    console.log(tableData1)
+    console.log(td_bool)
+    console.log(typeof(td_bool))
+    if(td_bool){
+        let tdTable = JSON.parse(document.getElementById('td_json').textContent);
+        console.log(tdTable)
+        console.log("lol")
+        renderTable(tdTable, 'partial-table-container_td', help_row, lens_id);
+    }
+</script>
+{% endblock%}

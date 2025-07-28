@@ -1,0 +1,8 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<p>Here you can download the entire data in the SQL database as of {{date}} . The file format you will receive will be a simple CSV.</p>
+<ul>
+    <li><a class="nav-link" id="downloadbutton" href="{% url 'export_csv' %}?{%for selected_field in lensfields%}fieldsform={{selected_field}}&{%endfor%}">Table of lensing systems, with one system per row</a></li>
+    <li><a class="nav-link" id="downloadbutton" href="{% url 'export_csv_comp' %}?{%for selected_field in compfields%}fieldsformcomp={{selected_field}}&{%endfor%}">Table with one quasar image or galaxy per row</a></li>
+</ul>  
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+  <h1>GraL database of multiply-imaged quasars</h1>
+  <p>
+    Welcome to the GraL database of multiply-imaged quasars. 
+    On this webpage, you can interact with tables containing information on the currently known multiply-imaged quasars which have been spectroscopically confirmed in the literature. 
+    This webpage is being developed under the auspices of the GraL group as a tool for the community and it is regularly maintained.
+    (last update: {{ date }})
+  </p>
+  <h2>Dynamic content</h2>
+  <p>As of {{ date }} database has the following record counts:</p>
+  <ul>
+    <li><strong>Lenses:</strong> {{ num_lenses }}</li>
+    <li><strong>Quad lenses:</strong> {{ num_quad }}</li>
+    <li><strong>Double lenses:</strong> {{ num_double }}</li>
+  </ul>
+
+  <footer>
+    <p>Website developed and maintained by Otavio S Krinski Moreira (<a href="mailto:otavioskrinskim@usp.br">otavioskrinskim@usp.br</a>)</p>
+  </footer>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+  <h1>Components table</h1>
+  <form action="" method="get">
+    {% csrf_token %}
+    <!-- {{ form }} -->
+    <div class="default-form">
+        <label for="defaultid">
+        <input class="form-check-input" type="checkbox" value="default" id = "defaultid" name="defaultform" checked>
+        Default</label>
+        <label for="allid">
+        <input class="form-check-input" type="checkbox" value="all" id = "allid" name="defaultform">
+       All columns</label>
+    </div>
+    <span>Filter:</span>
+    <div class="td-form">
+        <label for="td-id">
+        <input class="form-check-input" type="checkbox" value="All" id = "alltid" name="tdform" checked>
+        All</label>
+        <label for="allid">
+        <input class="form-check-input" type="checkbox" value="Time-delays" id = "tdid" name="tdform">
+       Time delays</label>
+    </div>
+    <div class="type-form">
+        <label for="typeallid">
+        <input class="form-check-input" type="checkbox" value="typeall" id = "typeallid" name="typeform" checked>
+        All</label>
+        <label for="doublesid">
+        <input class="form-check-input" type="checkbox" value="doubles" id = "doublesid" name="typeform">
+        Doubles</label>
+        <label for="quadsid">
+        <input class="form-check-input" type="checkbox" value="quads" id = "quadsid" name="typeform">
+        Quads</label>
+    </div>
+    <a id="toggleButton" onclick="toggleColumns(); return false" href="#">Show all columns</a>
+    <div class="form-columns" id = "form-columns-id">  
+    {% for option in options %}
+        <div class="form-check">
+            <label for={{option.0}}>
+            <input class="form-check-input" type="checkbox" value={{option.1}} id={{option.0}} name="fieldsform" {% if option.1 in savedfields %}checked{% endif %}>
+            <div class="form-label" id={{option.1}}> {{option.1}} <span id={{option.2}} class=labelpopup style="display: none">text </span> </div></label>
+        </div>
+    {% endfor %}
+    </div>
+   <!-- <input type="submit" value="Submit"> -->
+</form>
+<button id="downloadbutton"><a>Download csv table</a></button>
+<div id="counter"> </div>
+<button id="backbutton"><a>Previous page</a></button> <button id="nextbutton"><a>Next page</a></button>
+<!--
+<button>
+    <a class="nav-link" id="downloadbutton" href="{% url 'export_csv_comp' %}?{%for selected_field in savedfields%}fieldsformcomp={{selected_field}}&{%endfor%}">Download csv table</a>
+</button>
+ <table> 
+    {% for row in table %}
+        <tr>
+        {% for cell in row %}
+            {% if forloop.parentloop.first %} <th> {% else %} <td> {% endif %}
+                {{ cell }}
+            {% if forloop.parentloop.first %} </th> {% else %} </td> {% endif %}
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>-->
+<div id="table-container">
+    {% include 'catalog/table_partial.html' with table=table %}
+</div>
+<script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
+
+<script>
+
+    let help_row = {{ help_row|safe }};
+
+    window.myApp = {
+        helpUrl: "{% url 'help' %}",
+        lensesUrl: "{% url 'lenses' %}",
+        requestUrl: "{% url 'components' %}",
+        textUrl: "{% static "text.json" %}",
+        exportUrl: "{% url 'export_csv_comp' %}",
+        holder: new objectsClass()
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+        let fieldsForm = new checkboxClass('fieldsform', 'fieldsform', "no")
+        let tdForm = new checkboxClass('tdform', 'tdfilterform', "very")
+        let typeForm = new checkboxClass('typeform', 'typefilterform', "very")
+        let defaultForm = new checkboxClass('defaultform', "defaultform", "yes")
+        let downloader = new downloadClass("downloadbutton")
+        let next_button = new buttonPaginationClass("nextbutton", "next")
+        let back_button = new buttonPaginationClass("backbutton", "back")
+        console.log(window.myApp.holder.get_objects("checkboxes"))
+        area_info()
+    });
+
+    let firstTableData = JSON.parse(document.getElementById('table_json').textContent);
+    let lens_id = JSON.parse(document.getElementById('id_json').textContent);
+    renderTable(firstTableData, 'partial-table-container', help_row, lens_id);
+
+    var status = "less";
+
+</script>
+{% endblock %}
