@@ -40,6 +40,7 @@ class lensDetailView(generic.DetailView):
         compfields = [f.name for f in LensComponent._meta.get_fields()]
         context["fieldnames"] = lensfields[2:]
         fields = lensfields[2:] + compfields[2:]
+        print(fields)
         name = context['lens']
         fields1 = ["Name","RA_center_sexa", "DEC_center_sexa", "Type", "BibCode", "Max_separation", "z_source",'z_deflector_text', "z_bibcode"]
         table1, lens_id = create_table_pd(fields1,name=name)
@@ -89,7 +90,8 @@ def create_table_pd(fields, filter= None, name = False):
         component_data = LensComponent.objects.values(*compfields)  # Get all LensComponent data
         component_df = pd.DataFrame(list(component_data))  # Convert to DataFrame
         if('Name' in fields):
-            del component_df['Name']
+            if('Name' in component_df.columns.to_list()):
+                del component_df['Name']
         merged_df = pd.merge(lens_df, component_df, left_on='id', right_on='Name_id', suffixes=(None, None))
         del component_df
 
@@ -108,7 +110,7 @@ def create_table_pd(fields, filter= None, name = False):
         if(filter_td == "Time-delays"):
             merged_df = merged_df[merged_df["BibCode_TD"] != ""]
 
-    if("Name" in fields):
+    if("Name" in merged_df.columns.to_list()):
         name_list = merged_df["Name"].to_list()
     else:
         name_list = []

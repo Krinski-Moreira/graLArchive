@@ -1,0 +1,114 @@
+.topbar {
+  /*  position: -webkit-sticky;  Safari */
+  position: sticky;
+  overflow: hidden;
+  background-color: #333;
+  /*top: 0;*/
+  margin-top: 0px;
+  width: 100%;
+  z-index: 1000; /* Ensures the navbar stays on top of other content */
+}
+
+footer {
+  position: fixed;
+  height: 30px;
+  bottom: 0px;
+  left: 10px;
+  right: 0px;
+  margin-bottom: 0px;
+}
+
+
+/* Style the links inside the navigation bar */
+.topbar a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  display: block;
+  padding: 15px 15px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topbar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+div.default-form {
+  display:flex;
+
+}
+
+div.form-columns {
+  display: none; /* shown when a link targeting this id is clicked */
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.form-check {
+  flex: 0 0 25%; /* Allows items to take up 30% of the container width */
+  box-sizing: border-box;
+}
+
+.labelpopup {
+  position: absolute;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 1000;
+}
+
+a {
+  outline-color: transparent;
+}
+
+.nav-link{
+  color: #6900ff;
+  text-decoration: underline
+}
+
+table {
+  width: auto;
+  table-layout: auto;          /* Table takes up full width */
+  overflow: auto;      /* Horizontal scroll when needed */
+  display: block;        /* Allows for scrolling */
+}
+thead, tbody {
+  display: table;        /* Set these to display as table */
+}
+
+td{
+  border: 1px solid black;
+  padding: 10px;
+  line-height: 6px;
+  text-align: left;
+  min-width: 120px;      /* Minimum width for columns, adjust as necessary */ 
+}
+
+th{
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+  min-width: 120px;      /* Minimum width for columns, adjust as necessary */ 
+}
+
+tbody {
+  display: block;        /* This makes it scrollable */
+  overflow-x: auto;      /* Horizontal scrolling for the content */
+}
+
+/*thead {
+  width: 100%;            Full width for header 
+} */
+
+#bold-help {
+  font-weight: bold;
+}
