@@ -12,6 +12,8 @@ class Boolean_class(models.TextChoices):
         TRUE = "TRUE"
         FALSE = "FALSE"
 class Lens(models.Model):
+    class Meta:
+        app_label = 'catalog'
 
     Name = models.CharField(max_length=30)
     Type = models.CharField(max_length=10)
@@ -49,6 +51,9 @@ class Lens(models.Model):
         return reverse('lens-name', args=[str(self.Name)])
 
 class LensComponent(models.Model):
+    class Meta:
+        app_label = 'catalog'
+
     Name = models.ForeignKey(Lens, on_delete=models.CASCADE)
     Component = models.CharField(max_length=30)
     RA_best = models.FloatField(null=True, blank=True, help_text='RA best [°]')

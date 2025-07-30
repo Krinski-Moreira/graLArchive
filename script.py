@@ -1,13 +1,19 @@
-csv_filepathname = "/home/otavio/GaiaGraL_database_20250630.csv"
+csv_filepathname = "GaiaGraL_database_20250630.csv"
 #csv_filepathnameLens="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Lens.csv"
 #csv_filepathnameComponents="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Components.csv"
-td_filepathname = "/home/otavio/GaiaGraL_timeDelays_toSubmit.csv" #time delay file
+td_filepathname = "GaiaGraL_timeDelays_toSubmit.csv" #time delay file
 
 
 import sys,os, django
+from pathlib import Path
 djangoproject_home= os.getcwd()
+tables_path = str(Path.cwd().parent.parent)
+print(tables_path)
+csv_filepathname = tables_path +'/' + csv_filepathname
+td_filepathname = tables_path +'/' + td_filepathname
+print(csv_filepathname)
 sys.path.append(djangoproject_home)
-os.environ['DJANGO_SETTINGS_MODULE'] ='graLArchive.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] ='graLArchive.settings.base'
 django.setup()
 
 from catalog.models import Lens, LensComponent
