@@ -85,7 +85,6 @@ for lens_name in lens_names:
     for lensfield in lensfields:
         if(lensfield == "z_deflector_text"):
             z_list = table_df[table_df["Name"] == lens_name]["z_deflector"].to_list()
-            #print(z_list)
             value = ""
             for z in z_list:
                 try:
@@ -110,7 +109,6 @@ for lens_name in lens_names:
                 value = ""  # Replace NaN with an empty string
             if(value == ""):
                 #save = False
-                #print(lens_name, lensfield, value, type(value), table_df[table_df["Name"] == lens_name]["Confirmed"].to_list()[0])
                 continue
             try:
                 setattr(lens, lensfield, value) 
