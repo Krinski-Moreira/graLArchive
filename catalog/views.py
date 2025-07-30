@@ -552,3 +552,6 @@ def export_csv(request):
         writer.writerow(row)
 
     return response
+
+def acknowledgements(request):
+    return render(request, 'catalog/acknowledgements.html')

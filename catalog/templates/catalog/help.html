@@ -1,7 +1,7 @@
 {% extends "base_generic.html" %}
 {% load static %}
 {% block content %}
-<p>help text</p>
+<p>The following list contain a brief description for each of the table columns.</p>
 <div id="helptext"></div>
 {{fields|json_script:"fields_json" }}
 <script>

@@ -1,0 +1,46 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+<p></p>
+<h1>Acknowledgements</h1>
+<p></p>
+<p>This site wouldn't be possible without the encouragement and advice from Ramachrisna Teixeira, Pedro H. do Vale-Cunha, Christine Ducourant,
+Alberto Krone-Martins, Ludovic Delchambre, Jean-François Le Campion and many others in the Gaia GraL group.</p>
+<a>The table here presented was created and is continually mantained by the Gaia GraL group. It includes parameters from the literature, from <a href="https://www.cosmos.esa.int/web/gaia/dr3">Gaia DR3</a>,
+<a href="https://www.cosmos.esa.int/web/gaia/fpr">Gaia FPR</a> and <a href="https://wise2.ipac.caltech.edu/docs/release/allwise/">AllWISE</a>.
+<p></p>
+<p>Sources: <div id="bibcodesDiv"></div></p>
+<script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
+<script>
+    function get_text(){
+        const url = '{% static "bibcodes.json" %}'
+        fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status}`);
+            }
+            return response.json();})
+            .then((json) => display_text(json))
+            .catch((err) => console.error(`Fetch problem: ${err.message}`));
+    }
+    function display_text(json){
+        const div = document.getElementById("bibcodesDiv")
+        size = json["size"]
+        console.log(size)
+        html = ""
+        for(let i = 0; i < size; i++){
+            last = ", "
+            if(i == size-1){
+                last = "."
+            }
+            html = html + table_bibcode_links(json[i.toString()])  + last
+            if(i % 4 == 0){
+                html = html + "\n"
+            }
+            console.log(json[i.toString()])
+        }
+        div.innerHTML = html
+    }
+    get_text()
+</script>
+{% endblock %}

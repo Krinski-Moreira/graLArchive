@@ -1,10 +1,11 @@
 csv_filepathname = "/home/otavio/GaiaGraL_database_20250630.csv"
 #csv_filepathnameLens="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Lens.csv"
 #csv_filepathnameComponents="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Components.csv"
-djangoproject_home="/home/otavio/web-projects/graLArchive-main"
-td_filepathname = "/home/otavio/time_delays_25032025.csv" #time delay file
+td_filepathname = "/home/otavio/GaiaGraL_timeDelays_toSubmit.csv" #time delay file
+
 
 import sys,os, django
+djangoproject_home= os.getcwd()
 sys.path.append(djangoproject_home)
 os.environ['DJANGO_SETTINGS_MODULE'] ='graLArchive.settings'
 django.setup()
@@ -12,6 +13,7 @@ django.setup()
 from catalog.models import Lens, LensComponent
 
 import pandas as pd
+import numpy as np
 from datetime import datetime
 
 Lens.objects.all().delete()
@@ -54,6 +56,22 @@ columns = table_df.columns.tolist()
 print(columns)
 print(table_df)
 
+bibcodes = ["2023A&A...674A...1G", "2024A&A...685A.130G", "2014yCat.2328....0C"]
+
+def check_multiple(string, list):
+    try:
+        if(string == "" or np.isnan(string)):
+            return list
+    except:
+        print(string)
+    if(" / " in string):
+        string = string.split(" / ")
+        for x in string:
+            list.append(x)
+        return list
+    list.append(string)
+    return list
+
 for lens_name in lens_names:
     lens=Lens()
     print(lens_name)
@@ -80,6 +98,8 @@ for lens_name in lens_names:
 
         elif(lensfield in columns):
             value = table_df[table_df["Name"] == lens_name][lensfield].to_list()[0]
+            if(lensfield == "z_bibcode" or lensfield == "BibCode" or lensfield == "BibCode_TD"):
+                bibcodes = check_multiple(value, bibcodes)
             if pd.isna(value):  # Check if the value is NaN
                 value = ""  # Replace NaN with an empty string
             if(value == ""):
@@ -125,6 +145,19 @@ print(compfields)
 #table_df[table_df[lensfield] == lens_name]
 #table_df[lensfield]
 
+print(bibcodes)
+print(len(bibcodes))
+unique_bibcodes = np.unique(bibcodes)
+with open(djangoproject_home+'/catalog/static/bibcodes.json', 'w') as filebib:
+    print(len(unique_bibcodes))
+    filebib.write("{\n")
+    filebib.write(f"\"size\":\"{len(unique_bibcodes)}\",\n")
+    for i in range(len(unique_bibcodes)):
+        last = ","
+        if(i == len(unique_bibcodes)-1):
+            last = ""
+        filebib.write(f" \"{i}\": \"{unique_bibcodes[i]}\"{last}\n")
+    filebib.write("}")
 print("how often does this script run?")
 
 

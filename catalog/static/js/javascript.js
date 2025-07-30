@@ -67,6 +67,9 @@ function renderTable(tableData, element_id, help_row, lens_id) {
 
 function table_bibcode_links(bibcode){
     let html = ""
+    if(bibcode.includes("in prep") || bibcode.includes("in_prep")){
+        return bibcode
+    }
     if(bibcode.includes("https")){
         html = `<a href="${bibcode}">${bibcode}</a>`;
     }
@@ -333,3 +336,4 @@ window.toggleColumns = toggleColumns;
 window.get_help_text = get_help_text;
 window.help_text = help_text;
 window.area_info = area_info;
+window.table_bibcode_links = table_bibcode_links;
