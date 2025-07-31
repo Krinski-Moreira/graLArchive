@@ -63,8 +63,12 @@
         </tr>
     {% endfor %}
 </table>-->
-<div id="table-container">
-    {% include 'catalog/table_partial.html' with table=table %}
+<div class="scroll-wrapper">
+    <div class="scroll-inner">
+        <div id="table-container">
+            {% include 'catalog/table_partial.html' with table=table %}
+        </div>
+    </div>
 </div>
 <script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
 
