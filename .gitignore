@@ -4,3 +4,4 @@
 /.venv
 /.env
 /static
+__pycache__/*.pyc
