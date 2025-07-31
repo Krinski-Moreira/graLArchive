@@ -1,11 +1,13 @@
 .topbar {
   /*  position: -webkit-sticky;  Safari */
-  position: sticky;
+  position: fixed;
   overflow: hidden;
+  top: 0;
   background-color: #333;
   /*top: 0;*/
   margin-top: 0px;
   width: 100%;
+  height: 80px; /* match your margin-top */
   z-index: 1000; /* Ensures the navbar stays on top of other content */
 }
 
@@ -88,15 +90,46 @@ a {
   border-top: 1px solid #ccc;
 }*/
 
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  margin: 20px;
+}
+
+.fixed-scrollbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #f8f8f8;
+  border-top: 1px solid #ccc;
+  z-index: 10000;
+}
+.fixed-scrollbar-inner {
+  height: 1px;
+}
+
 /* Allow the inner container to grow to match the table width
 .scroll-inner {
   width: max-content;
 }*/
 
+
+.main_content {
+  margin-top: 100px;
+ /*  overflow: auto;*/
+}*/
+
+
 table {
   width: auto;
   table-layout: auto;          /* Table takes up full width */
-  overflow: auto;       /*Horizontal scroll when needed */
+  /*overflow: auto;       /*Horizontal scroll when needed */
   display: block;       /* Allows for scrolling */
 }
 thead, tbody {

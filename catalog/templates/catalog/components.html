@@ -63,12 +63,16 @@
         </tr>
     {% endfor %}
 </table>-->
-<div class="scroll-wrapper">
+<div class="tableWrapper">
     <div class="scroll-inner">
         <div id="table-container">
             {% include 'catalog/table_partial.html' with table=table %}
         </div>
     </div>
+</div>
+<p></p>
+<div class="fixed-scrollbar" id="fixedScrollbar">
+<div class="fixed-scrollbar-inner" id="fixedScrollbarInner"></div>
 </div>
 <script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
 
@@ -99,7 +103,7 @@
     let firstTableData = JSON.parse(document.getElementById('table_json').textContent);
     let lens_id = JSON.parse(document.getElementById('id_json').textContent);
     renderTable(firstTableData, 'partial-table-container', help_row, lens_id);
-
+    scroll()
     var status = "less";
 
 </script>

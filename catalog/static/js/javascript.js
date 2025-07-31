@@ -337,6 +337,25 @@ function area_info(){
     });
 }
 
+function scroll(){
+    const tableWrapper = document.getElementById('tableWrapper');
+    const fixedScrollbar = document.getElementById('fixedScrollbar');
+    const fixedScrollbarInner = document.getElementById('fixedScrollbarInner');
+    const myTable = document.getElementById("table-container");
+
+    function updateScrollbarWidth() {
+      fixedScrollbarInner.style.width = myTable.scrollWidth + 'px';
+    }
+
+    tableWrapper.addEventListener('scroll', () => {
+      fixedScrollbar.scrollLeft = tableWrapper.scrollLeft;
+    });
+
+    fixedScrollbar.addEventListener('scroll', () => {
+      tableWrapper.scrollLeft = fixedScrollbar.scrollLeft;
+    });
+}
+
 window.renderTable = renderTable;
 window.containsObject = containsObject;
 window.get_filter_value = get_filter_value;
@@ -345,3 +364,4 @@ window.get_help_text = get_help_text;
 window.help_text = help_text;
 window.area_info = area_info;
 window.table_bibcode_links = table_bibcode_links;
+window.scroll = scroll;
