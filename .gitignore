@@ -2,3 +2,4 @@
 /graLArchive/settings/production
 /manage.py
 /.venv
+/.env
