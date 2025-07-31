@@ -1,4 +1,4 @@
-csv_filepathname = "GaiaGraL_database_20250630.csv"
+csv_filepathname = "GaiaGraL_database_20250630_new.csv"
 #csv_filepathnameLens="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Lens.csv"
 #csv_filepathnameComponents="C:/Users/otavio.LAPTOP-D1DO624H/web-projects/djangosite/Components.csv"
 td_filepathname = "GaiaGraL_timeDelays_toSubmit.csv" #time delay file
