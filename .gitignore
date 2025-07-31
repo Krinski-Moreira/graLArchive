@@ -5,3 +5,4 @@
 /.env
 /static
 __pycache__/*.pyc
+/catalog/__pycache__
