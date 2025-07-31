@@ -40,8 +40,12 @@
 <button id="downloadbutton"><a>Download csv table</a></button>
 <div id="counter"> </div>
 <button id="backbutton"><a>Previous page</a></button> <button id="nextbutton"><a>Next page</a></button>
-<div id="table-container">
-    {% include 'catalog/table_partial.html' with table=table %}
+<div class="scroll-wrapper">
+  <div class="scroll-inner">
+    <div id="table-container">
+        {% include 'catalog/table_partial.html' with table=table %}
+    </div>
+    </div>
 </div>
 
 <script type="text/javascript" src="{% static 'js/javascript.js' %}"></script>
