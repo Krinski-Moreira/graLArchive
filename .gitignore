@@ -1,3 +1,4 @@
 /db.sqlite3
 /graLArchive/settings/production
 /manage.py
+/.venv
