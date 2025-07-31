@@ -75,10 +75,28 @@ a {
   text-decoration: underline
 }
 
+.scroll-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: 20px; /* Just enough to hold the scrollbar */
+  z-index: 1000;
+  background-color: white;
+  border-top: 1px solid #ccc;
+}
+
+/* Allow the inner container to grow to match the table width */
+.scroll-inner {
+  width: max-content;
+}
+
 table {
   width: auto;
   table-layout: auto;          /* Table takes up full width */
-  overflow: auto;      /* Horizontal scroll when needed */
+ /* overflow: auto;       Horizontal scroll when needed */
   display: block;        /* Allows for scrolling */
 }
 thead, tbody {

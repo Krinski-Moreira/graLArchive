@@ -50,7 +50,7 @@ function renderTable(tableData, element_id, help_row, lens_id) {
                     }
                 }
                 else {
-                    cell.textContent = cellData;
+                    cell.textContent = formatFloat(cellData);
                 }
             }
             row.appendChild(cell);
@@ -63,6 +63,14 @@ function renderTable(tableData, element_id, help_row, lens_id) {
     container.innerHTML = ''; // Clear previous content
     container.appendChild(table);
     //area_info()
+}
+
+function formatFloat(value) {
+    if (typeof value === "number" && !Number.isInteger(value)) {
+        return parseFloat(value.toFixed(4)).toString();
+    } else {
+        return value.toString();
+    }
 }
 
 function table_bibcode_links(bibcode){

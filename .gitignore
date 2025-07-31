@@ -3,3 +3,4 @@
 /manage.py
 /.venv
 /.env
+/static
