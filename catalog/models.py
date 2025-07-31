@@ -18,17 +18,16 @@ class Lens(models.Model):
     Name = models.CharField(max_length=30)
     Type = models.CharField(max_length=10)
     #source_id_DR3 = models.BigIntegerField(null=True, blank=True)
-    gravLensName = models.CharField(max_length=30, null=True, blank=True)
     #compId = models.SmallIntegerField(null=True, blank=True)
-    Max_separation = models.FloatField(null=True, blank=True, help_text='Max separation [\"]')
     #Nb_of_published_components = models.SmallIntegerField(null=True, blank=True)
-    BibCode = models.CharField(max_length=30, null=True, blank=True)
     RA_center = models.FloatField(null=True, blank=True, help_text='RA center [°]')
     DEC_center = models.FloatField(null=True, blank=True, help_text='DEC center [°]')
     RA_center_sexa = models.CharField(max_length=30, null=True, blank=True, help_text='RA center [hr:min:sec]')
     DEC_center_sexa = models.CharField(max_length=30, null=True, blank=True, help_text='DEC center [deg:min:sec]')
+    Max_separation = models.FloatField(null=True, blank=True, help_text='Max separation [\"]')
     z_source = models.FloatField(null=True, blank=True, help_text='z source')
     z_deflector_text = models.CharField(max_length=30, null=True, blank=True, help_text='z deflectors')
+    BibCode = models.CharField(max_length=30, null=True, blank=True)
     z_bibcode = models.CharField(max_length=30, null=True, blank=True, help_text='z bibcode')
     BibCode_TD = models.CharField(max_length=30, null=True, blank=True)
     tAB = models.CharField(max_length=20, null=True, blank=True, help_text="tAB [d]")
@@ -43,6 +42,7 @@ class Lens(models.Model):
     ErrtBD = models.FloatField(null=True, blank=True, help_text="Err_tBD [d]")
     tCD = models.FloatField(null=True, blank=True, help_text="tCD [d]")
     ErrtCD = models.FloatField(null=True, blank=True, help_text="Err_tCD [d]")
+    gravLensName = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
         return self.Name
